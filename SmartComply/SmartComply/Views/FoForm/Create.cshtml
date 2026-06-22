@@ -1,0 +1,251 @@
+﻿@model SmartComply.Models.ViewModels.FoFormMasterViewModel
+
+@{
+    ViewData["Title"] = "Create New Form with Items";
+    // --- NEW LINE HERE ---
+    ViewData["ItemTypes"] = Model.ItemTypes; // Transfer ItemTypes from ViewModel to ViewData
+}
+
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="/"><img src="~/assets/images/logo/logo.png" alt="Logo" /></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" method="post" id="master-detail-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <h4>Form Header (Title and Compliance)</h4>
+                <div class="card p-3 mb-4 shadow-sm">
+                    <div class="form-group mb-3">
+                        <label asp-for="FoName" class="control-label"></label>
+                        <input asp-for="FoName" class="form-control" />
+                        <span asp-validation-for="FoName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="FoCid" class="control-label"></label>
+                        <select asp-for="FoCid" class="form-control"
+                                asp-items="@(Model.ComplianceList)">
+                            <option value="">-- Select Compliance --</option>
+                        </select>
+                        <span asp-validation-for="FoCid" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h4 class="mt-4">Item Details (Multiple entries per session)</h4>
+                <div id="item-details-container" class="card p-3 shadow-sm position-relative">
+                    <span asp-validation-for="Details" class="text-danger"></span>
+
+                    @if (Model.Details != null)
+                    {
+                        for (int i = 0; i < Model.Details.Count; i++)
+                        {
+                            @await Html.PartialAsync("_FoFormDetailPartial", Model.Details[i], new ViewDataDictionary(ViewData) { { "Index", i } })
+                        }
+                    }
+                </div>
+
+                <button type="button" id="add-item-btn" class="btn btn-info mt-3">Add Another Item</button>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Create Form" class="btn btn-primary" />
+                    
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Get the initial item index. This is crucial for new rows added by JS.
+            var itemIndex = @(Model?.Details?.Count ?? 0);
+            console.log("Initial itemIndex:", itemIndex); // Debugging line
+
+            // Function to re-index names/ids after adding/removing rows
+            // This is essential for correct model binding when sending list data
+            function reIndexDetailItems() {
+                console.log("Re-indexing detail items...");
+                $('.item-detail-row').each(function (index) {
+                    $(this).attr('data-index', index); // Update data-index attribute
+
+                    // Re-index all input fields (text, select, hidden) and validation message spans
+                    $(this).find(':input, span[data-valmsg-for]').each(function () {
+                        const originalName = $(this).attr('name') || $(this).attr('data-valmsg-for'); // Get name or validation target
+                        if (originalName) {
+                            // Replace the old index with the new one in the name attribute
+                            const newName = originalName.replace(/Details\[\d+\]/, `Details[${index}]`);
+                            $(this).attr('name', newName); // Update name attribute
+                            $(this).attr('data-valmsg-for', newName); // Update validation message target
+
+                            // Also update IDs for consistency (needed for labels, client-side validation)
+                            const originalId = $(this).attr('id');
+                            if (originalId) {
+                                const newId = originalId.replace(/Details_\d+__/, `Details_${index}__`);
+                                $(this).attr('id', newId); // Update ID attribute
+                            }
+                        }
+                    });
+                });
+                itemIndex = $('.item-detail-row').length; // Update the global index counter
+                console.log("Re-indexing complete. New itemIndex:", itemIndex); // Debugging line
+            }
+
+            // Function to add a new detail item row
+            $('#add-item-btn').click(function (e) {
+                e.preventDefault(); // Prevent default button action if it's inside a form
+                console.log("Add button clicked. Current itemIndex:", itemIndex); // Debugging line
+
+                $.ajax({
+                    url: '@Url.Action("GetFoFormDetailPartial", "FoForm")',
+                    type: 'GET',
+                    data: { index: itemIndex }, // Pass the current itemIndex to the server
+                    success: function (data) {
+                        console.log("AJAX success. Appending new row."); // Debugging line
+                        $('#item-details-container').append(data); // Append the received HTML
+
+                        // Re-parse unobtrusive validation for newly added elements
+                        // This ensures validation works on dynamic inputs
+                        var form = $('#master-detail-form');
+                        form.removeData('validator'); // Remove old validator
+                        form.removeData('unobtrusiveValidation'); // Remove old unobtrusive validator
+                        $.validator.unobtrusive.parse(form); // Parse new elements
+
+                        itemIndex++; // Increment index for the next item
+                        reIndexDetailItems(); // IMPORTANT: Re-index AFTER adding the new item
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error adding detail row:", error);
+                        console.error("XHR status:", status);
+                        console.error("Server Response:", xhr.responseText); // Log server's full error response
+                        alert("Failed to add new item. Please check console for details.");
+                    }
+                });
+            });
+
+            // Function to remove an item row (using event delegation for dynamically added elements)
+            $('#item-details-container').on('click', '.remove-item-btn', function () {
+                console.log("Remove button clicked."); // Debugging line
+                // Ensure at least one item row remains
+                if ($('.item-detail-row').length > 1) {
+                    $(this).closest('.item-detail-row').remove();
+                    reIndexDetailItems(); // Re-index after removal to keep binding correct
+                } else {
+                    alert("You must have at least one item entry.");
+                }
+            });
+
+            // Handle Preview Form button click
+        $('#preview-form-btn').click(function () {
+            console.log("Preview button clicked.");
+
+            // Serialize the entire form data
+            var formData = $('#master-detail-form').serialize();
+
+            $.ajax({
+                url: '@Url.Action("Preview", "FoForm")',
+                type: 'POST',
+                data: formData, // Send the serialized form data
+                success: function (data) {
+                    console.log("Preview AJAX success. Loading modal.");
+                    // Load the received partial view HTML into the modal content
+                    $('#formPreviewModal .modal-content').html(data);
+                    // Show the modal
+                    var myModal = new bootstrap.Modal(document.getElementById('formPreviewModal'));
+                    myModal.show();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error generating preview:", error);
+                    console.error("Server Response:", xhr.responseText);
+                    alert("Failed to generate preview. Please check console for details.");
+                }
+            });
+        });
+
+            // Initial re-indexing on page load
+            // This is important if Model.Details had more than one item initially (e.g., on edit or postback with errors)
+            reIndexDetailItems();
+        });
+    </script>
+}

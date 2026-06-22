@@ -1,0 +1,251 @@
+﻿@model SmartComply.Models.FoForm
+
+@{
+    ViewData["Title"] = "Form Details";
+}
+
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="/"><img src="~/assets/images/logo/logo.png" alt="Logo" /></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+
+<h1>Form Details</h1>
+
+<div>
+
+
+    <table class="table table-bordered table-striped">
+        <tbody>
+            <tr>
+                <th style="width: 25%;">
+                    Form Title
+                </th>
+                <td>
+                    @Html.DisplayFor(model => model.FoName)
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Form Compliance
+                </th>
+                <td>
+                    @Html.DisplayFor(model => model.AmCompliance.ComplianceName)
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Form Creation
+                </th>
+                <td>
+                    @Html.DisplayFor(model => model.FoDatetime)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Sections & Items</h3>
+
+    @if (Model.Details != null && Model.Details.Any())
+    {
+        var groupedDetails = Model.Details
+                                .GroupBy(d => d.SecName)
+                                .OrderBy(g => g.Key);
+
+        @foreach (var sectionGroup in groupedDetails)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    Section: @sectionGroup.Key
+                </div>
+                <div class="card-body">
+                    <h5>Items in this Section:</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Item Type</th>
+                                <th>Audit Answer</th> @* Updated column header to 'Audit Answer' *@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in sectionGroup.OrderBy(i => i.ItemName))
+                            {
+                                <tr>
+                                    <td>@item.ItemName</td>
+                                    <td>@item.TyItem?.TyName</td>
+                                    <td>
+                                        @* Render HTML form controls with values, but read-only/disabled *@
+                                        @{
+                                            // Generate unique IDs for each control to ensure proper HTML and avoid conflicts
+                                            string uniqueControlId = $"control_{item.Id}";
+                                            string radioGroupName = $"radio_group_{item.Id}"; // Crucial for radio buttons
+                                        }
+                                        @switch (item.TyItem?.TyName?.ToLower())
+                                        {
+                                            case "text":
+                                                <input type="text"
+                                                       id="@uniqueControlId"
+                                                       class="form-control-plaintext" @* Bootstrap class for read-only, plain text styling *@
+                                                       value="@item.ItemValue"
+                                                       readonly /> @* Important: Makes the input non-editable *@
+                                                break;
+                                            case "radio":
+                                                // Determine if "Yes" or "No" should be checked based on ItemValue
+                                                bool isYesChecked = (item.ItemValue?.ToLower() == "yes" || item.ItemValue?.ToLower() == "true");
+                                                bool isNoChecked = (item.ItemValue?.ToLower() == "no" || item.ItemValue?.ToLower() == "false");
+
+                                                <div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input"
+                                                               type="radio"
+                                                               name="@radioGroupName" @* Same name groups the radios for this item *@
+                                                               id="@(uniqueControlId)_yes"
+                                                               value="Yes"
+                                                               @(isYesChecked ? "checked" : "") @* Conditionally check 'Yes' *@
+                                                               disabled /> @* Important: Makes the radio buttons unclickable *@
+                                                        <label class="form-check-label" for="@(uniqueControlId)_yes">Yes</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input"
+                                                               type="radio"
+                                                               name="@radioGroupName"
+                                                               id="@(uniqueControlId)_no"
+                                                               value="No"
+                                                               @(isNoChecked ? "checked" : "") @* Conditionally check 'No' *@
+                                                               disabled /> @* Important: Makes the radio buttons unclickable *@
+                                                        <label class="form-check-label" for="@(uniqueControlId)_no">No</label>
+                                                    </div>
+                                                    @if (!isYesChecked && !isNoChecked && string.IsNullOrEmpty(item.ItemValue))
+                                                    {
+                                                        <span class="text-muted ms-2">- Not Answered -</span>
+                                                    }
+                                                </div>
+                                                break;
+                                            case "range":
+                                                // Assuming range is from 1 to 5 based on previous context
+                                                if (int.TryParse(item.ItemValue, out int rangeValue) && rangeValue >= 1 && rangeValue <= 5)
+                                                {
+                                                    <div class="d-flex align-items-center">
+                                                        <input type="range"
+                                                               id="@uniqueControlId"
+                                                               class="form-range" @* Bootstrap class for range input styling *@
+                                                               min="1"
+                                                               max="5"
+                                                               value="@rangeValue"
+                                                               disabled /> @* Important: Makes the slider non-interactive *@
+                                                        <span class="ms-2">@rangeValue</span> @* Display the exact value next to the slider *@
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    // Default visual for unanswered/invalid range
+                                                    <input type="range"
+                                                           id="@uniqueControlId"
+                                                           class="form-range"
+                                                           min="1"
+                                                           max="5"
+                                                           value="1" @* Default to min value if not answered *@
+                                                           disabled />
+                                                    <span class="ms-2 text-muted">- Not Answered -</span>
+                                                }
+                                                break;
+                                            default:
+                                                // Fallback for types not explicitly handled or if ItemValue is null/empty
+                                                <input type="text"
+                                                       id="@uniqueControlId"
+                                                       class="form-control-plaintext"
+                                                       value="@item.ItemValue"
+                                                       readonly />
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No detail entries (sections or items) found for this form.</p>
+    }
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a> |
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a> 
+    
+</div>

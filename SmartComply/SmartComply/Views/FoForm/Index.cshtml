@@ -1,0 +1,254 @@
+﻿@model IEnumerable<SmartComply.Models.FoForm>
+
+@{
+    ViewData["Title"] = "Forms List";
+}
+
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="index.html"><img src="assets/images/logo/logo.png" alt="Logo" srcset=""></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>All Dynamic Form</h3>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Index">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Dynamic Form</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    @Html.AntiForgeryToken()
+    <section class="section">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">All Forms</h4>
+        </div>
+        <div class="card-body">
+            <p>
+                <a asp-controller="FoForm" asp-action="Create" class="btn btn-primary">Create New Form</a>
+            </p>
+
+            <table class="table table-bordered table-striped w-full" id="formsTable"> @* Added an ID for easy JS selection *@
+                <thead class="bg-light">
+                    <tr>
+                        <th>Form Title</th>
+                        <th>Compliance</th>
+                        <th>Date Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var form in Model)
+                        {
+                            @* Add a class to the row if it's archived for styling *@
+                            <tr class="@(form.isArchived ? "archived-form" : "")" data-form-id="@form.Id">
+                                <td>@form.FoName</td>
+                                <td>@form.AmCompliance?.ComplianceName</td>
+                                <td>@form.FoDatetime.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@form.Id" class="btn btn-sm btn-info @(form.isArchived ? "disabled" : "")">Details</a>
+                                    <a asp-action="Edit" asp-route-id="@form.Id" class="btn btn-sm btn-warning @(form.isArchived ? "disabled" : "")">Edit</a>
+                                    
+                                    @* Conditional Archive/Unarchive button *@
+                                    @if (!form.isArchived)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-danger archive-btn" data-id="@form.Id">Archive</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success unarchive-btn" data-id="@form.Id">Unarchive</button> @* Optional: If you want unarchive functionality *@
+                                    }
+                                    
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">No forms found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Function to handle archiving
+            $('#formsTable').on('click', '.archive-btn', function () {
+                var button = $(this);
+                var formId = button.data('id');
+                var row = button.closest('tr');
+
+                if (confirm('Are you sure you want to archive this form?')) {
+                    $.ajax({
+                        url: '@Url.Action("Archive", "FoForm")', // URL to the Archive action
+                        type: 'POST',
+                        data: { id: formId },
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Send anti-forgery token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                alert(response.message);
+                                // Update UI without full page refresh
+                                row.addClass('archived-form'); // Add class to grey out the row
+                                row.find('.archive-btn').replaceWith('<button type="button" class="btn btn-sm btn-success unarchive-btn" data-id="' + formId + '">Unarchive</button>');
+                                row.find('.btn-warning').addClass('disabled'); // Disable Edit button
+                                // You might also want to disable other action buttons or modify them
+                            } else {
+                                alert('Error: ' + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX Error:", status, error);
+                            alert('An error occurred during archiving. Please try again.');
+                        }
+                    });
+                }
+            });
+
+            // Optional: Function to handle unarchiving (requires a new Unarchive action in controller)
+            $('#formsTable').on('click', '.unarchive-btn', function () {
+                var button = $(this);
+                var formId = button.data('id');
+                var row = button.closest('tr');
+
+                if (confirm('Are you sure you want to unarchive this form?')) {
+                    $.ajax({
+                        url: '@Url.Action("Unarchive", "FoForm")', // You would need to create an Unarchive action
+                        type: 'POST',
+                        data: { id: formId },
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                alert(response.message);
+                                row.removeClass('archived-form');
+                                row.find('.unarchive-btn').replaceWith('<button type="button" class="btn btn-sm btn-danger archive-btn" data-id="' + formId + '">Archive</button>');
+                                row.find('.btn-warning').removeClass('disabled');
+                            } else {
+                                alert('Error: ' + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX Error:", status, error);
+                            alert('An error occurred during unarchiving. Please try again.');
+                        }
+                    });
+                }
+            });
+
+            
+        });
+    </script>
+
+    @* Add some basic CSS for archived forms *@
+    <style>
+        .archived-form {
+            opacity: 0.6; /* Slightly grey out the row */
+            font-style: italic;
+            background-color: #f8f9fa; /* Light background for archived items */
+        }
+            /* This rule disables most buttons in an archived row */
+            .archived-form .btn {
+                pointer-events: none; /* Disable clicks on buttons within archived row */
+                cursor: default;
+            }
+        /* Explicitly re-enable the Unarchive button */
+        .unarchive-btn {
+            pointer-events: auto !important; /* Override the 'none' for this specific button */
+            cursor: pointer !important; /* Ensure the cursor indicates it's clickable */
+        }
+        /* If you also want the "Details" button to be clickable in archived rows,
+                   assuming it uses btn-info: */
+        .archived-form .btn-info {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+    </style>
+}

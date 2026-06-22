@@ -1,0 +1,49 @@
+@model SmartComply.ViewModels.CorrectivePlanViewModel
+@{
+    ViewData["Title"] = "Edit Corrective Plan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Corrective Plan</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.AuditId)
+    <div class="form-group">
+        <label asp-for="IssueIdentified"></label>
+        @Html.TextBoxFor(m => m.IssueIdentified, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.IssueIdentified)
+    </div>
+    <div class="form-group">
+        <label asp-for="CorrectiveAction"></label>
+        @Html.TextBoxFor(m => m.CorrectiveAction, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CorrectiveAction)
+    </div>
+    <div class="form-group">
+        <label asp-for="ResponsiblePersonId">Responsible Person</label>
+        @Html.DropDownListFor(m => m.ResponsiblePersonId, new SelectList(Model.Users, "Id", "Email", Model.ResponsiblePersonId), "Select User", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ResponsiblePersonId)
+    </div>
+    <div class="form-group">
+        <label asp-for="TargetCompletionDate"></label>
+        @Html.TextBoxFor(m => m.TargetCompletionDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+        @Html.ValidationMessageFor(m => m.TargetCompletionDate)
+    </div>
+    <div class="form-group">
+        <label asp-for="Priority"></label>
+        @Html.DropDownListFor(m => m.Priority, new SelectList(new[] { "High", "Medium", "Low" }, Model.Priority), "Select Priority", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Priority)
+    </div>
+    <div class="form-group">
+        <label asp-for="ProgressNotes"></label>
+        @Html.TextAreaFor(m => m.ProgressNotes, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ProgressNotes)
+    </div>
+    <div class="form-group">
+        <label asp-for="AuditId">Audit</label>
+        @Html.DropDownListFor(m => m.AuditId, new SelectList(ViewBag.Audits as List<SmartComply.Models.Audit>, "Id", "AuditTitle", Model.AuditId), "Select Audit", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.AuditId)
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,0 +1,169 @@
+@model SmartComply.ViewModels.AuditDetailsViewModel
+
+@{
+    ViewData["Title"] = "Audit Details";
+    string statusBadgeClass;
+    switch (Model.Audit.AuditStatus)
+    {
+        case "Pending":
+            statusBadgeClass = "bg-warning";
+            break;
+        case "InProgress":
+            statusBadgeClass = "bg-info";
+            break;
+        case "Completed":
+            statusBadgeClass = "bg-success";
+            break;
+        case "RequiresCorrection":
+            statusBadgeClass = "bg-danger";
+            break;
+        default:
+            statusBadgeClass = "bg-secondary";
+            break;
+    }
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-search me-2"></i>Audit Details
+                        </h4>
+                        <span class="badge @statusBadgeClass fs-6">@Model.Audit.AuditStatus</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th class="bg-light" width="30%">Audit Title</th>
+                                    <td>@Model.Audit.AuditTitle</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Compliance</th>
+                                    <td>@(Model.Audit.Compliance?.ComplianceName ?? "N/A")</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Form</th>
+                                    <td>@(Model.Audit.Form?.FoName ?? "N/A")</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Audit Date</th>
+                                    <td>@Model.Audit.AuditDate.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Completed Date</th>
+                                    <td>@(Model.Audit.CompletedDate?.ToString("MMM dd, yyyy") ?? "Not completed")</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Audit Score</th>
+                                    <td>
+                                        @if (Model.Audit.AuditScore.HasValue)
+                                        {
+                                            <span class="badge @(Model.Audit.AuditScore >= 80 ? "bg-success" : Model.Audit.AuditScore >= 60 ? "bg-warning" : "bg-danger")">
+                                                @Model.Audit.AuditScore.Value.ToString("F1")%
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not scored</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Description</h6>
+                            <p class="text-muted">@Model.Audit.AuditDescription</p>
+
+                            @if (!string.IsNullOrEmpty(Model.Audit.AuditNotes))
+                            {
+                                <h6 class="fw-bold mt-3">Notes</h6>
+                                <p class="text-muted">@Model.Audit.AuditNotes</p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.Audit.AuditFindings))
+                            {
+                                <h6 class="fw-bold mt-3">Findings</h6>
+                                <p class="text-muted">@Model.Audit.AuditFindings</p>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.Responses.Any())
+                    {
+                        <hr />
+                        <h5 class="mb-3">
+                            <i class="fas fa-list-check me-2"></i>Audit Responses
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Response</th>
+                                        <th>Compliant</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var response in Model.Responses)
+                                    {
+                                        <tr>
+                                            <td>@response.QuestionText</td>
+                                            <td>@(response.ResponseValue ?? "No response")</td>
+                                            <td>
+                                                @if (response.IsCompliant.HasValue)
+                                                {
+                                                    <span class="badge @(response.IsCompliant.Value ? "bg-success" : "bg-danger")">
+                                                        @(response.IsCompliant.Value ? "Yes" : "No")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>@(response.ResponseNotes ?? "No notes")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                    <hr />
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Audits
+                        </a>
+                        <div>
+                            @if (Model.Audit.AuditStatus == "Pending")
+                            {
+                                <a asp-action="Conduct" asp-route-id="@Model.Audit.Id" class="btn btn-success me-2">
+                                    <i class="fas fa-play me-2"></i>Conduct Audit
+                                </a>
+                            }
+                            <a asp-action="Edit" asp-route-id="@Model.Audit.Id" class="btn btn-primary me-2">
+                                <i class="fas fa-edit me-2"></i>Edit
+                            </a>
+                            @if (Model.Audit.AuditStatus == "Completed" || Model.Audit.AuditStatus == "RequiresCorrection")
+                            {
+                                <a asp-controller="CorrectivePlan" asp-action="Create" asp-route-auditId="@Model.Audit.Id" class="btn btn-warning me-2">
+                                    <i class="fas fa-clipboard-check me-2"></i>Create Action Plan
+                                </a>
+                                <a asp-controller="FollowUpAudit" asp-action="Create" asp-route-auditId="@Model.Audit.Id" class="btn btn-info">
+                                    <i class="fas fa-redo me-2"></i>Schedule Follow-up
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

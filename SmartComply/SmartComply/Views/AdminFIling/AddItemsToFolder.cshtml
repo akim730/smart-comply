@@ -1,0 +1,165 @@
+﻿@model SmartComply.ViewModels.AddFolderItemsViewModel
+
+@{
+    ViewData["Title"] = $"Add Items to {Model.ComplianceFolderName}";
+}
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="/"><img src="~/assets/images/logo/logo.png" alt="Logo" /></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+<div class="page-heading">
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2>Add Items to Folder: @Model.ComplianceFolderName</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="AddItemsToFolder" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="ComplianceFolderId" />
+
+                    <div id="itemsContainer">
+                        @for (int i = 0; i < Model.NewItems.Count; i++)
+                        {
+                            <div class="item-row border p-3 mb-3">
+                                <input type="hidden" asp-for="NewItems[i].Id" /> @* For if you later support editing *@
+                                <h3>New Item @(i + 1)</h3>
+                                <div class="form-group mb-2">
+                                    <label asp-for="NewItems[i].Name"></label>
+                                    <input asp-for="NewItems[i].Name" class="form-control" />
+                                    <span asp-validation-for="NewItems[i].Name" class="text-danger"></span>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label asp-for="NewItems[i].Description"></label>
+                                    <textarea asp-for="NewItems[i].Description" class="form-control"></textarea>
+                                    <span asp-validation-for="NewItems[i].Description" class="text-danger"></span>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="NewItems[i].IsRequired" type="checkbox" class="form-check-input" />
+                                    <label asp-for="NewItems[i].IsRequired" class="form-check-label"></label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button" id="addNewItem" class="btn btn-info mb-3">Add Another Item</button>
+
+                    <div class="form-group mb-3">
+                        <button type="submit" class="btn btn-primary">Save Items</button>
+                        <a asp-action="FolderDetails" asp-route-id="@Model.ComplianceFolderId" class="btn btn-secondary">Back to Folder Details</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Basic JavaScript to add more item rows dynamically
+        document.getElementById('addNewItem').addEventListener('click', function () {
+            var container = document.getElementById('itemsContainer');
+            var index = container.children.length; // Get current count of item rows
+
+            var newRow = document.createElement('div');
+            newRow.classList.add('item-row', 'border', 'p-3', 'mb-3');
+            newRow.innerHTML = `
+                <h3>New Item ${index + 1}</h3>
+                <div class="form-group mb-2">
+                    <label for="NewItems_${index}__Name">Item Name</label>
+                    <input class="form-control" type="text" id="NewItems_${index}__Name" name="NewItems[${index}].Name" value="" />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="NewItems[${index}].Name" data-valmsg-replace="true"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label for="NewItems_${index}__Description">Description (e.g., 'Financial Statement for Q1')</label>
+                    <textarea class="form-control" id="NewItems_${index}__Description" name="NewItems[${index}].Description"></textarea>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="NewItems[${index}].Description" data-valmsg-replace="true"></span>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" data-val="true" data-val-required="The Is Required field is required." id="NewItems_${index}__IsRequired" name="NewItems[${index}].IsRequired" value="true" />
+                    <label class="form-check-label" for="NewItems_${index}__IsRequired">Is Required</label>
+                </div>
+            `;
+            container.appendChild(newRow);
+
+            // Re-parse validation rules for the new elements
+            var form = document.querySelector('form');
+            var validator = $.data(form, 'validator');
+            if (validator) {
+                validator.unobtrusive.parse(newRow);
+            }
+        });
+    </script>
+}

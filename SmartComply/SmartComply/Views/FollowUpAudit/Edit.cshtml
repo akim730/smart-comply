@@ -1,0 +1,49 @@
+@model SmartComply.ViewModels.FollowUpAuditViewModel
+@{
+    ViewData["Title"] = "Edit Follow-Up Audit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Follow-Up Audit</h2>
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="OriginalAuditId" class="form-label">Original Audit</label>
+        <select asp-for="OriginalAuditId" class="form-select">
+            <option value="">Select Audit</option>
+            @foreach (var audit in ViewBag.Audits as List<SmartComply.Models.Audit>)
+            {
+                <option value="@audit.Id">@audit.AuditTitle</option>
+            }
+        </select>
+        <span asp-validation-for="OriginalAuditId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="FollowUpTitle" class="form-label"></label>
+        @Html.TextBoxFor(m => m.FollowUpTitle, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.FollowUpTitle)
+    </div>
+    <div class="mb-3">
+        <label asp-for="FollowUpDescription" class="form-label"></label>
+        @Html.TextAreaFor(m => m.FollowUpDescription, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.FollowUpDescription)
+    </div>
+    <div class="mb-3">
+        <label asp-for="ScheduledDate" class="form-label"></label>
+        @Html.TextBoxFor(m => m.ScheduledDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+        @Html.ValidationMessageFor(m => m.ScheduledDate)
+    </div>
+    <div class="mb-3">
+        <label asp-for="AuditorId" class="form-label">Auditor</label>
+        <select asp-for="AuditorId" class="form-select">
+            <option value="">Select Auditor</option>
+            @foreach (var user in Model.Users)
+            {
+                <option value="@user.Id">@user.UserName</option>
+            }
+        </select>
+        <span asp-validation-for="AuditorId" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+</form>

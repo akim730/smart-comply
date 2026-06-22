@@ -1,0 +1,648 @@
+﻿@model SmartComply.ViewModels.ManagerDashboardViewModel
+@{
+    ViewData["Title"] = "Manager Dashboard";
+    
+}
+@using System.Text.Json
+
+div id="sidebar" class="active">
+<div class="sidebar-wrapper active">
+    <div class="sidebar-header">
+        <div class="d-flex justify-content-between">
+            <div class="logo">
+                <a href="index.html"><img src="~/assets/images/logo/logo.png" alt="Logo" srcset=""></a>
+            </div>
+            <div class="toggler">
+                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar-menu">
+        <ul class="menu">
+            <li class="sidebar-title">Menu</li>
+
+            <li class="sidebar-item active ">
+                <a asp-controller="Manager" asp-action="Index" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item  ">
+                <a asp-controller="AuditForm" asp-action="Index" class='sidebar-link'>
+                    <i class="bi bi-file-earmark-medical-fill"></i>
+                    <span>Audit Form</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item  ">
+                <a asp-controller="Filing" asp-action="Index" class='sidebar-link'>
+                    <i class="bi bi-file-earmark-medical-fill"></i>
+                    <span>File Upload</span>
+                </a>
+            </li>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <li class="sidebar-item ">
+
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                        <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Logout</span>
+                        </button>
+                        @Html.AntiForgeryToken() @* Essential for security! *@
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li class="sidebar-item ">
+                    <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+            }
+
+        </ul>
+    </div>
+    <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+</div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Manager Dashboard</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Manager Dashboard</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.PendingVerificationCount</h4>
+                            <p class="card-text">Audits Requiring Verification</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.PendingCorrectivePlanApprovalCount</h4>
+                            <p class="card-text">Corrective Plans Pending</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.ApprovedAudits</h4>
+                            <p class="card-text">Approved Audits</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalSubmittedAudits</h4>
+                            <p class="card-text">Total Submitted Audits</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audits Requiring Verification -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-check me-1"></i>
+                        Audits Requiring Verification
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AuditsRequiringVerification.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Audit Title</th>
+                                        <th>Compliance</th>
+                                        <th>Completed Date</th>
+                                        <th>Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var audit in Model.AuditsRequiringVerification)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@audit.AuditTitle</strong>
+                                                <br><small class="text-muted">@audit.AuditDescription</small>
+                                            </td>
+                                            <td>@audit.Compliance?.ComplianceName</td>
+                                            <td>
+                                                @if (audit.CompletedDate.HasValue)
+                                                {
+                                                    @audit.CompletedDate.Value.ToString("MMM dd, yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (audit.AuditScore.HasValue)
+                                                {
+                                                    <span class="badge bg-info">@audit.AuditScore.Value%</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("VerifyAudit", new { id = audit.Id })" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>Review & Verify
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5>No audits requiring verification</h5>
+                            <p class="text-muted">All completed audits have been verified.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Corrective Plans Requiring Approval -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks me-1"></i>
+                        Corrective Plans Pending
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.CorrectivePlansRequiringApproval.Any())
+                    {
+                        @foreach (var plan in Model.CorrectivePlansRequiringApproval)
+                        {
+                            <div class="border rounded p-3 mb-3">
+                                <h6 class="mb-2">@plan.IssueIdentified</h6>
+                                <p class="text-muted small mb-2">@plan.CorrectiveAction</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-@(plan.Priority == "High" ? "danger" : plan.Priority == "Medium" ? "warning" : "info")">
+                                        @plan.Priority Priority
+                                    </span>
+                                    <a href="@Url.Action("ApproveCorrectivePlan", "CorrectivePlan", new { id = plan.Id })" class="btn btn-outline-primary btn-sm">
+                                        Approve
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        <div class="text-center">
+                            <a href="@Url.Action("PendingApprovals", "CorrectivePlan")" class="btn btn-outline-secondary">
+                                View All Pending
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h6>No pending approvals</h6>
+                            <p class="text-muted small">All corrective plans are approved.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    @* <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-1"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("SubmittedAudits")" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-list me-1"></i>
+                                View All Submitted Audits
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("PendingApprovals", "CorrectivePlan")" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-tasks me-1"></i>
+                                Pending Corrective Plans
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-secondary btn-block">
+                                <i class="fas fa-clipboard-list me-1"></i>
+                                All Audits
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Create", "Audit")" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-plus me-1"></i>
+                                Create New Audit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+
+    <!-- Recent Audits Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Audits</h6>
+                    <div>
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Index", new { filter = "all" })" class="btn btn-sm btn-outline-primary @(ViewBag.Filter == "all" ? "active" : "")">All</a>
+                            <a href="@Url.Action("Index", new { filter = "pending" })" class="btn btn-sm btn-outline-warning @(ViewBag.Filter == "pending" ? "active" : "")">Pending</a>
+                            <a href="@Url.Action("Index", new { filter = "inprogress" })" class="btn btn-sm btn-outline-info @(ViewBag.Filter == "inprogress" ? "active" : "")">In Progress</a>
+                            <a href="@Url.Action("Index", new { filter = "completed" })" class="btn btn-sm btn-outline-success @(ViewBag.Filter == "completed" ? "active" : "")">Completed</a>
+                        </div>
+                    </div>
+                </div>                <div class="card-body">
+                    @if (Model.Audits.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Audit Title</th>
+                                        <th>Compliance</th>
+                                        <th>Status</th>
+                                        <th>Audit Date</th>
+                                        <th>Auditor</th>
+                                        <th>Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var audit in Model.Audits)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@audit.AuditTitle</strong>
+                                                @if (!string.IsNullOrEmpty(audit.AuditDescription))
+                                                {
+                                                    <br>
+                                        
+                                                    <small class="text-muted">@audit.AuditDescription.Substring(0, Math.Min(50, audit.AuditDescription.Length))...</small>
+                                                }
+                                            </td>
+                                            <td>@audit.Compliance?.ComplianceName</td>
+                                            <td>
+                                                @{
+                                                    string statusClass = "badge-secondary"; // Default
+                                                    string displayText = audit.AuditStatus;
+
+                                                    switch (audit.AuditStatus)
+                                                    {
+                                                        case "Pending":
+                                                            statusClass = "badge-warning";
+                                                            displayText = "Pending";
+                                                            break;
+                                                        case "InProgress":
+                                                            statusClass = "badge-info";
+                                                            displayText = "In Progress";
+                                                            break;
+                                                        case "Completed":
+                                                            statusClass = "badge-success";
+                                                            displayText = "Completed";
+                                                            break;
+                                                        case "RequiresCorrection":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Requires Correction";
+                                                            break;
+                                                        case "Approved":
+                                                            statusClass = "badge-success";
+                                                            displayText = "Approved";
+                                                            break;
+                                                        case "Rejected":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Rejected";
+                                                            break;
+                                                        case "RequiresRevision":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Requires Revision";
+                                                            break;
+                                                        default:
+                                                            statusClass = "badge-secondary";
+                                                            displayText = string.IsNullOrEmpty(audit.AuditStatus) ? "Unknown" : audit.AuditStatus;
+                                                            break;
+                                                    }
+                                                }
+                                                <span class="badge @statusClass">@displayText</span>
+                                            </td>
+                                            <td>@audit.AuditDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@audit.AuditorId</td>
+                                            <td>
+                                                @if (audit.AuditScore.HasValue)
+                                                {
+                                                    <span class="badge @(audit.AuditScore >= 80 ? "badge-success" : audit.AuditScore >= 60 ? "badge-warning" : "badge-danger")">
+                                                        @audit.AuditScore.Value.ToString("F1")%
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = audit.Id })" class="btn btn-sm btn-outline-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @{
+                                                        // Determine if the audit is in a final state where actions should be disabled
+                                                        bool isFinalStatus = audit.AuditStatus == "Completed" || audit.AuditStatus == "Approved";
+                                                        string disabledClass = isFinalStatus ? "disabled" : "";
+                                                        string tabIndex = isFinalStatus ? "-1" : ""; // Prevent tabbing to disabled links
+                                                        string ariaDisabled = isFinalStatus ? "true" : "false"; // For accessibility
+                                                    }
+
+                                                    @* <a href="@Url.Action("Conduct", new { id = audit.Id })"
+                                                       class="btn btn-sm btn-outline-primary @disabledClass"
+                                                       title="Conduct Audit"
+                                                       tabindex="@tabIndex"
+                                                       aria-disabled="@ariaDisabled">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", new { id = audit.Id })"
+                                                       class="btn btn-sm btn-outline-secondary @disabledClass"
+                                                       title="Edit"
+                                                       tabindex="@tabIndex"
+                                                       aria-disabled="@ariaDisabled">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a> *@
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">No audits found. <a href="@Url.Action("Create")">Create your first audit</a></p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Charts Side by Side -->
+    <div class="row">
+        <div class="col-lg-4">
+            @* Changed from col-lg-6 to col-lg-4 *@
+            <div class="card">
+                <div class="card-header">
+                    <h4>Forms Per Compliance Type</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.FormsPerCompliance != null && Model.FormsPerCompliance.Any())
+                    {
+                        <canvas id="compliancePieChart" height="350"></canvas>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">No compliance data available for the chart.</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            @* Changed from col-lg-6 to col-lg-8 *@
+            <div class="card">
+                <div class="card-header">
+                    <h4>Forms Submitted Per Month</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.FormsPerMonth != null && Model.FormsPerMonth.Any())
+                    {
+                        <div id="chart-forms-perMonth" style="height: 350px;"></div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">No monthly data available for the chart.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Auto-refresh dashboard every 5 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 300000);
+    </script>
+
+    <!-- Chart.js Doughnut Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        @if (Model.FormsPerCompliance != null && Model.FormsPerCompliance.Any())
+        {
+                                    @:const ctx = document.getElementById('compliancePieChart').getContext('2d');
+                                    @:const data = {
+                                    @:    labels: @Html.Raw(JsonSerializer.Serialize(Model.FormsPerCompliance.Keys)),
+                                    @:    datasets: [{
+                                    @:        label: 'Forms Count',
+                                    @:        data: @Html.Raw(JsonSerializer.Serialize(Model.FormsPerCompliance.Values)),
+                                    @:        backgroundColor: [
+                                    @:            '#ff6b6b', '#48dbfb', '#1dd1a1', '#feca57', '#5f27cd',
+                                    @:            '#ff9ff3', '#00d2d3', '#576574', '#10ac84'
+                                    @:        ],
+                                    @:        borderColor: '#f1f2f6',
+                                    @:        borderWidth: 2,
+                                    @:        hoverOffset: 12
+                                    @:    }]
+                                    @:};
+                                    @:const options = {
+                                    @:    responsive: true,
+                                    @:    maintainAspectRatio: false,
+                                    @:    plugins: {
+                                    @:        legend: {
+                                    @:            position: 'right',
+                                    @:            labels: {
+                                    @:                color: '#333',
+                                    @:                font: {
+                                    @:                    size: 15,
+                                    @:                    weight: 'bold'
+                                    @:                }
+                                    @:            }
+                                    @:        },
+                                    @:        tooltip: {
+                                    @:            backgroundColor: '#222',
+                                    @:            titleColor: '#fff',
+                                    @:            bodyColor: '#fff',
+                                    @:            callbacks: {
+                                    @:                label: function(context) {
+                                    @:                    let label = context.label || '';
+                                    @:                    let value = context.raw || 0;
+                                    @:                    return ` ${label}: ${value} forms`;
+                                    @:                }
+                                    @:            }
+                                    @:        }
+                                    @:    }
+                                    @:};
+                                    @:new Chart(ctx, {
+                                    @:    type: 'doughnut',
+                                    @:    data: data,
+                                    @:    options: options
+                                    @:});
+        }
+    </script>
+
+    <!-- ApexCharts Bar Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.5/dist/apexcharts.min.js"></script>
+    <script>
+        @if (Model.FormsPerMonth != null && Model.FormsPerMonth.Any())
+        {
+                                    @:document.addEventListener("DOMContentLoaded", function () {
+                                    @:    var monthlyData = @Html.Raw(JsonSerializer.Serialize(Model.FormsPerMonth));
+                                    @:    var months = Object.keys(monthlyData);
+                                    @:    var counts = months.map(m => monthlyData[m]);
+                                    @:    var options = {
+                                    @:        series: [{
+                                    @:            name: 'Forms Submitted',
+                                    @:            data: counts
+                                    @:        }],
+                                    @:        chart: {
+                                    @:            type: 'bar',
+                                    @:            height: 350,
+                                    @:            toolbar: { show: true },
+                                    @:            foreColor: '#333',
+                                    @:        },
+                                    @:        plotOptions: {
+                                    @:            bar: {
+                                    @:                horizontal: false,
+                                    @:                columnWidth: '55%',
+                                    @:                endingShape: 'rounded'
+                                    @:            }
+                                    @:        },
+                                    @:        dataLabels: { enabled: false },
+                                    @:        stroke: { show: true, width: 2, colors: ['transparent'] },
+                                    @:        xaxis: {
+                                    @:            categories: months,
+                                    @:            labels: {
+                                    @:                style: {
+                                    @:                    colors: '#555',
+                                    @:                    fontSize: '12px',
+                                    @:                }
+                                    @:            }
+                                    @:        },
+                                    @:        yaxis: {
+                                    @:            title: {
+                                    @:                text: 'Number of Forms',
+                                    @:                style: {
+                                    @:                    color: '#333',
+                                    @:                    fontSize: '14px',
+                                    @:                    fontWeight: 600,
+                                    @:                }
+                                    @:            },
+                                    @:            labels: {
+                                    @:                style: {
+                                    @:                    colors: '#555',
+                                    @:                    fontSize: '12px',
+                                    @:                }
+                                    @:            }
+                                    @:        },
+                                    @:        fill: { opacity: 1, colors: ['#0d6efd'] },
+                                    @:        tooltip: {
+                                    @:            y: {
+                                    @:                formatter: function(val) {
+                                    @:                    return val + " forms";
+                                    @:                }
+                                    @:            },
+                                    @:            theme: 'dark'
+                                    @:        },
+                                    @:        grid: {
+                                    @:            borderColor: '#e7e7e7',
+                                    @:            row: {
+                                    @:                colors: ['#f8f8f8', 'transparent'],
+                                    @:                opacity: 0.5
+                                    @:            },
+                                    @:        }
+                                    @:    };
+                                    @:    var chart = new ApexCharts(document.querySelector("#chart-forms-perMonth"), options);
+                                    @:    chart.render();
+                                    @:});
+        }
+    </script>
+}

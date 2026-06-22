@@ -1,0 +1,120 @@
+@model List<SmartComply.Models.Audit>
+@{
+    ViewData["Title"] = "Submitted Audits";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Submitted Audits</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("ManagerDashboard")">Manager Dashboard</a></li>
+                    <li class="breadcrumb-item active">Submitted Audits</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-1"></i>
+                            All Submitted Audits
+                        </h5>
+                        <div>
+                            <a href="@Url.Action("ManagerDashboard")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <!-- Filter Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="auditTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                                    All (@Model.Count)
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                                    Pending Verification (@Model.Count(a => a.VerificationStatus == null || a.VerificationStatus == "Pending"))
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
+                                    Approved (@Model.Count(a => a.VerificationStatus == "Approved"))
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">
+                                    Rejected (@Model.Count(a => a.VerificationStatus == "Rejected"))
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="auditTabContent">
+                            <!-- All Audits -->
+                            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                                @await Html.PartialAsync("_SubmittedAuditsTable", Model)
+                            </div>
+
+                            <!-- Pending Verification -->
+                            <div class="tab-pane fade" id="pending" role="tabpanel">
+                                @await Html.PartialAsync("_SubmittedAuditsTable", Model.Where(a => a.VerificationStatus == null || a.VerificationStatus == "Pending").ToList())
+                            </div>
+
+                            <!-- Approved -->
+                            <div class="tab-pane fade" id="approved" role="tabpanel">
+                                @await Html.PartialAsync("_SubmittedAuditsTable", Model.Where(a => a.VerificationStatus == "Approved").ToList())
+                            </div>
+
+                            <!-- Rejected -->
+                            <div class="tab-pane fade" id="rejected" role="tabpanel">
+                                @await Html.PartialAsync("_SubmittedAuditsTable", Model.Where(a => a.VerificationStatus == "Rejected").ToList())
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                            <h4>No Submitted Audits</h4>
+                            <p class="text-muted">There are no submitted audits to display.</p>
+                            <a href="@Url.Action("Create", "Audit")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Create First Audit
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable if available
+            if ($.fn.DataTable) {
+                $('.data-table').DataTable({
+                    "pageLength": 25,
+                    "order": [[ 3, "desc" ]], // Sort by completed date desc
+                    "columnDefs": [
+                        { "orderable": false, "targets": [6] } // Actions column
+                    ]
+                });
+            }
+        });
+    </script>
+}

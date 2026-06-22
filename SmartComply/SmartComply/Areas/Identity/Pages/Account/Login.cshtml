@@ -1,0 +1,59 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div id="auth">
+    <div class="row h-100">
+        <div class="col-lg-5 col-12">
+            <div id="auth-left">
+                <div class="auth-logo mb-4">
+                    <a href="/"><img src="~/assets/images/logo/logo.png" alt="Logo"></a>
+                </div>
+                <h1 class="auth-title">Log in.</h1>
+                <p class="auth-subtitle mb-5">Log in with your data that you entered during registration.</p>
+
+                <form id="account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                    <div class="form-group position-relative has-icon-left mb-4">
+                        <input asp-for="Input.Email" class="form-control form-control-xl" autocomplete="username" placeholder="Email" />
+                        <div class="form-control-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group position-relative has-icon-left mb-4">
+                        <input asp-for="Input.Password" class="form-control form-control-xl" autocomplete="current-password" placeholder="Password" />
+                        <div class="form-control-icon">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check form-check-lg d-flex align-items-end mb-4">
+                        <input class="form-check-input me-2" asp-for="Input.RememberMe" />
+                        <label class="form-check-label text-gray-600" asp-for="Input.RememberMe">
+                            @Html.DisplayNameFor(m => m.Input.RememberMe)
+                        </label>
+                    </div>
+
+                    <button id="login-submit" type="submit" class="btn btn-primary btn-block btn-lg shadow-lg mt-3">Log in</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-7 d-none d-lg-block">
+            <div id="auth-right">
+                <!-- You can put a background image or illustration here as per Mazer's design -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

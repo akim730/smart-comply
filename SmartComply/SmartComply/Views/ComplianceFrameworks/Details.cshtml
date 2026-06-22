@@ -1,0 +1,131 @@
+﻿@model SmartComply.ViewModels.ComplianceFrameworkDetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="index.html"><img src="~/assets/images/logo/logo.png" alt="Logo" srcset=""></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+<div class="page-heading">
+    
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h2>Details Compliance</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <th style="width: 20%;">
+                                @Html.DisplayNameFor(model => model.ComplianceName)
+                            </th>
+                            <td>
+                                @Html.DisplayFor(model => model.ComplianceName)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ComplianceDescription)
+                            </th>
+                            <td>
+                                @Html.DisplayFor(model => model.ComplianceDescription)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.CreatedAt)
+                            </th>
+                            <td>
+                                @Html.DisplayFor(model => model.CreatedAt)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.UpdatedAt)
+                            </th>
+                            <td>
+                                @Html.DisplayFor(model => model.UpdatedAt)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,22 @@
+@model SmartComply.Models.FollowUpAudit
+@{
+    ViewData["Title"] = "Follow-Up Audit Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Follow-Up Audit Details</h2>
+<table class="table table-bordered">
+    <tr><th>ID</th><td>@Model.Id</td></tr>
+    <tr><th>Original Audit ID</th><td>@Model.OriginalAuditId</td></tr>
+    <tr><th>Follow-Up Title</th><td>@Model.FollowUpTitle</td></tr>
+    <tr><th>Description</th><td>@Model.FollowUpDescription</td></tr>
+    <tr><th>Scheduled Date</th><td>@Model.ScheduledDate.ToString("yyyy-MM-dd")</td></tr>
+    <tr><th>Conducted Date</th><td>@(Model.ConductedDate != null ? Model.ConductedDate.Value.ToString("yyyy-MM-dd") : "")</td></tr>
+    <tr><th>Auditor</th><td>@Model.AuditorId</td></tr>
+    <tr><th>Status</th><td>@Model.Status</td></tr>
+    <tr><th>Findings</th><td>@Model.Findings</td></tr>
+    <tr><th>Recommendations</th><td>@Model.Recommendations</td></tr>
+    <tr><th>Created At</th><td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td></tr>
+    <tr><th>Updated At</th><td>@(Model.UpdatedAt != null ? Model.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "")</td></tr>
+</table>
+<a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>

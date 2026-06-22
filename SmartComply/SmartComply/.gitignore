@@ -1,0 +1,81 @@
+# .NET Core build outputs
+bin/
+obj/
+[Oo]ut/
+[Bb]uild/
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+orleans.codegen.cs
+*.vsidx
+.userosscache
+.sln.docstates
+
+# Visual Studio Code files
+.vscode/
+.history/
+
+# Rider files
+.idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet packages
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Local development configuration files
+appsettings.Development.json
+appsettings.local.json
+appsettings.*.local.json
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# Log files
+*.log
+logs/
+Log/
+
+# Entity Framework migrations
+# Comment this out if you want to version control your migrations
+# **/Migrations/*
+
+# MacOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node.js (if any frontend work)
+node_modules/
+npm-debug.log
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResults/

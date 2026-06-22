@@ -1,0 +1,58 @@
+﻿@model SmartComply.Models.ViewModels.FoFormDetailViewModel
+@{
+    // The 'index' variable is passed from the parent view or JavaScript to ensure unique names
+    var index = ViewData["Index"] as int?;
+    // This naming convention is crucial for MVC model binding of lists: CollectionName[index].PropertyName
+    var prefix = $"Details[{index}]";
+    // This is used for HTML element IDs, which should also be unique
+    var idPrefix = $"Details_{index}__";
+
+    // Access the shared ItemTypes list from ViewData.
+    // The controller is setting ViewData["ItemTypes"] as List<SelectListItem>,
+    // so casting to IEnumerable<SelectListItem> is correct and compatible with asp-items.
+    var itemTypesForDropdown = ViewData["ItemTypes"] as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+
+    // For debugging, you can add this line:
+    // Console.WriteLine($"DEBUG: _FoFormDetailPartial loaded for index {index}. ItemTypes count: {itemTypesForDropdown.Count()}");
+}
+
+<div class="item-detail-row border p-3 mb-3 rounded bg-light" data-index="@index">
+    @* Hidden field for Id: Essential for Edit operations to identify existing details *
+    * If Id is 0, it's a new detail. If non-zero, it's an existing one. *@
+    <input type="hidden" name="@(prefix).Id" value="@Model.Id" />
+
+    <button type="button" class="btn btn-danger btn-sm remove-item-btn" style="position: absolute; top: 10px; right: 10px; border-radius: 50%; width: 30px; height: 30px; padding: 0; font-size: 1rem; line-height: 1; text-align: center;">&times;</button> @* Close button for removing a row *@
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="@(idPrefix)SecName" class="control-label">@Html.DisplayNameFor(model => model.SecName)</label>
+                <input type="text" id="@(idPrefix)SecName" name="@(prefix).SecName" value="@Model.SecName" class="form-control" />
+                <span data-valmsg-for="@(prefix).SecName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="@(idPrefix)ItemName" class="control-label">@Html.DisplayNameFor(model => model.ItemName)</label>
+                <input type="text" id="@(idPrefix)ItemName" name="@(prefix).ItemName" value="@Model.ItemName" class="form-control" />
+                <span data-valmsg-for="@(prefix).ItemName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="@(idPrefix)TyItemId" class="control-label">@Html.DisplayNameFor(model => model.TyItemId)</label>
+
+                @* --- IMPORTANT CHANGE HERE: Using asp-for and asp-items Tag Helpers --- *@
+                <select asp-for="TyItemId"
+                        id="@(idPrefix)TyItemId"
+                        name="@(prefix).TyItemId"
+                        class="form-control"
+                        asp-items="itemTypesForDropdown">
+                    @* Use the prepared IEnumerable<SelectListItem> *@
+                    <option value="">-- Select Type --</option>
+                </select>
+                <span asp-validation-for="TyItemId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</div>

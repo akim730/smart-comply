@@ -1,0 +1,317 @@
+@model SmartComply.ViewModels.ConductAuditViewModel
+
+@{
+    ViewData["Title"] = "Conduct Audit";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>Conduct Audit: @Model.Audit.AuditTitle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Audit Information</h6>
+                                    <p class="mb-1"><strong>Compliance:</strong> @(Model.Audit.Compliance?.ComplianceName ?? "N/A")</p>
+                                    <p class="mb-1"><strong>Form:</strong> @(Model.Audit.Form?.FoName ?? "N/A")</p>
+                                    <p class="mb-0"><strong>Date:</strong> @Model.Audit.AuditDate.ToString("MMM dd,yyyy")</p> @* Corrected "YYYY" to "yyyy" *@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Description</h6>
+                                    <p class="mb-0">@Model.Audit.AuditDescription</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="SubmitAudit" method="post" id="auditForm">
+                        <input type="hidden" name="AuditId" value="@Model.Audit.Id" />
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-question-circle me-2"></i>Audit Questions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @{
+                                    var formQuestions = Model.Audit.Form?.Details ?? new List<FoFormDetail>();
+                                }
+
+                                @for (int i = 0; i < formQuestions.Count; i++)
+                                {
+                                    var question = formQuestions.ElementAt(i);
+                                    var existingResponse = Model.ExistingResponses.FirstOrDefault(r => r.QuestionId == question.Id.ToString());
+
+                                    <div class="question-card mb-4 p-3 border rounded" data-question-type="@(question.TyItem?.TyHtmlType)">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <h6 class="question-text">@question.ItemName</h6>
+                                                <input type="hidden" name="Responses[@i].QuestionId" value="@question.Id" />
+                                                <input type="hidden" name="Responses[@i].QuestionText" value="@question.ItemName" />
+
+                                                @if (question.TyItem?.TyHtmlType == "radio")
+                                                {
+                                                    <div class="btn-group" role="group" data-question="@question.Id">
+                                                        <input type="radio" class="btn-check" name="Responses[@i].ResponseValue" value="Yes" id="@(question.Id)_yes"
+                                                               @(existingResponse?.ResponseValue == "Yes" ? "checked" : "") />
+                                                        <label class="btn btn-outline-success" for="@(question.Id)_yes">
+                                                            <i class="fas fa-check me-1"></i>Yes
+                                                        </label>
+
+                                                        <input type="radio" class="btn-check" name="Responses[@i].ResponseValue" value="No" id="@(question.Id)_no"
+                                                               @(existingResponse?.ResponseValue == "No" ? "checked" : "") />
+                                                        <label class="btn btn-outline-danger" for="@(question.Id)_no">
+                                                            <i class="fas fa-times me-1"></i>No
+                                                        </label>
+                                                    </div>
+                                                    <input type="hidden" name="Responses[@i].IsCompliant" class="compliance-field" data-question="@question.Id"
+                                                           value="@(existingResponse?.IsCompliant?.ToString() ?? "")" />
+                                                }
+                                                else if (question.TyItem?.TyHtmlType == "range")
+                                                {
+                                                    <input type="number" name="Responses[@i].ResponseValue" class="form-control question-input" min="1" max="5" step="1"
+                                                           value="@(existingResponse?.ResponseValue ?? "")" placeholder="Enter a number (1-5)" />
+                                                    <input type="hidden" name="Responses[@i].IsCompliant" class="compliance-field" data-question="@question.Id"
+                                                           value="@(existingResponse?.IsCompliant?.ToString() ?? "")" />
+                                                }
+                                                else if (question.TyItem?.TyHtmlType == "text")
+                                                {
+                                                    <textarea name="Responses[@i].ResponseValue" class="form-control question-input" rows="3"
+                                                               placeholder="Enter your response...">@(existingResponse?.ResponseValue ?? "")</textarea>
+                                                }
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Notes</label>
+                                                <textarea name="Responses[@i].ResponseNotes" class="form-control question-input" rows="3"
+                                                          placeholder="Add notes...">@(existingResponse?.ResponseNotes ?? "")</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-notes-medical me-2"></i>Overall Assessment
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Audit Score (%)</label>
+                                            <div class="input-group">
+                                                <input type="text" id="calculatedAuditScoreDisplay" class="form-control" value="@(Model.Audit.AuditScore?.ToString("F1") ?? "N/A")%" readonly />
+                                                <input type="hidden" name="AuditScore" id="hiddenAuditScore" value="@(Model.Audit.AuditScore?.ToString("F1") ?? "")" />
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                              <label class="form-label">Audit Status</label>
+
+                                                                    <select name="AuditStatus" class="form-select">
+
+                                                                        @{
+
+                                                                            var currentStatus = Model.Audit.AuditStatus;
+
+                                                                        }
+
+                                                                        @if (currentStatus == "InProgress")
+
+                                                                        {
+
+                                                                            <option value="InProgress" selected>In Progress</option>
+
+                                                                        }
+
+                                                                        else
+
+                                                                        {
+
+                                                                            <option value="InProgress">In Progress</option>
+
+                                                                        }
+
+
+
+                                                                        @if (currentStatus == "Completed")
+
+                                                                        {
+
+                                                                            <option value="Completed" selected>Completed</option>
+
+                                                                        }
+
+                                                                        else
+
+                                                                        {
+
+                                                                            <option value="Completed">Completed</option>
+
+                                                                        }
+
+
+
+                                                                        @if (currentStatus == "RequiresCorrection")
+
+                                                                        {
+
+                                                                            <option value="RequiresCorrection" selected>Requires Correction</option>
+
+                                                                        }
+
+                                                                        else
+
+                                                                        {
+
+                                                                            <option value="RequiresCorrection">Requires Correction</option>
+
+                                                                        }
+
+                                                                    </select>
+                                          </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">General Notes</label>
+                                            <textarea name="AuditNotes" class="form-control" rows="3"
+                                                      placeholder="Enter general audit notes...">@(Model.Audit.AuditNotes ?? "")</textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Findings</label>
+                                            <textarea name="AuditFindings" class="form-control" rows="3"
+                                                      placeholder="Document key findings...">@(Model.Audit.AuditFindings ?? "")</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Details" asp-route-id="@Model.Audit.Id" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Details
+                            </a>
+                            <div>
+                                <button type="submit" name="submitType" value="save" class="btn btn-primary me-2">
+                                    <i class="fas fa-save me-2"></i>Save Progress
+                                </button>
+                                <button type="submit" name="submitType" value="complete" class="btn btn-success">
+                                    <i class="fas fa-check-circle me-2"></i>Complete Audit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Event listener for radio buttons
+            $('input[type="radio"]').change(function() {
+                var questionCard = $(this).closest('.question-card');
+                var questionId = questionCard.find('input[name$=".QuestionId"]').val();
+                var complianceField = questionCard.find(`.compliance-field[data-question="${questionId}"]`);
+                var isCompliant = $(this).val() === 'Yes';
+                complianceField.val(isCompliant); // Set 'True' or 'False'
+                calculateScore();
+            });
+
+            // Event listener for range inputs (type="number" with min/max 1-5)
+            $('input[type="number"][min="1"][max="5"]').on('input change', function() {
+                var questionCard = $(this).closest('.question-card');
+                var questionId = questionCard.find('input[name$=".QuestionId"]').val();
+                var complianceField = questionCard.find(`.compliance-field[data-question="${questionId}"]`);
+                var rangeValue = parseFloat($(this).val());
+
+                // Set IsCompliant for range questions based on a simple rule (e.g., has a valid score)
+                // You might define a threshold like >=3 for 'true' if needed for specific logic in your backend
+                var isCompliant = !isNaN(rangeValue) && rangeValue >= 1 && rangeValue <= 5;
+                complianceField.val(isCompliant);
+                calculateScore();
+            });
+
+
+            function calculateScore() {
+                let totalPossibleScore = 0; // Sum of max points for all relevant questions
+                let actualAchievedScore = 0; // Sum of points achieved
+
+                $('.question-card').each(function() {
+                    const questionType = $(this).data('question-type'); // Get the data-question-type
+
+                    if (questionType === "radio") {
+                        const responseValue = $(this).find(`input[name$=".ResponseValue"]:checked`).val();
+                        totalPossibleScore += 1; // Radio questions contribute a max of 1 point
+
+                        if (responseValue === "Yes") {
+                            actualAchievedScore += 1;
+                        }
+                    } else if (questionType === "range") {
+                        const rangeInput = $(this).find('input[type="number"][min="1"][max="5"]');
+                        const responseValue = parseFloat(rangeInput.val());
+
+                        if (!isNaN(responseValue) && responseValue >= 1 && responseValue <= 5) {
+                            totalPossibleScore += 5; // Max possible score for a range question is 5
+                            actualAchievedScore += responseValue; // Add the actual value entered
+                        } else {
+                            // If the range input is empty or invalid, it doesn't contribute to score
+                            // You might consider adding `totalPossibleScore += 5;` here if an unanswered range
+                            // question should reduce the overall percentage.
+                            // For now, it simply ignores questions with invalid/empty range answers for the score.
+                        }
+                    }
+                    // 'text' type questions are generally qualitative and do not contribute to a numerical score.
+                });
+
+                let finalScorePercentage = 0;
+                if (totalPossibleScore > 0) {
+                    finalScorePercentage = (actualAchievedScore / totalPossibleScore) * 100;
+                }
+
+                // Update the displayed score and the hidden input for submission
+                $('#calculatedAuditScoreDisplay').val(finalScorePercentage.toFixed(1) + '%');
+                $('#hiddenAuditScore').val(finalScorePercentage.toFixed(1));
+            }
+
+            // Initial calculation on page load
+            calculateScore();
+
+            // Auto-save functionality (optional)
+            let autoSaveTimer;
+            $('#auditForm input.question-input, #auditForm textarea.question-input, #auditForm select').on('input change', function() {
+                // For radio and range inputs, calculateScore is already called by their specific change handlers.
+                // This ensures general notes/findings don't trigger unnecessary score recalcs unless you want them to.
+                // If you want all changes to trigger recalculation (e.g., if text fields also contribute to score),
+                // remove the if condition below.
+                const elementType = $(this).attr('type');
+                if (elementType !== 'radio' && elementType !== 'number') { // Exclude radios and numbers (ranges)
+                    // calculateScore(); // Uncomment if other inputs should also trigger score calculation
+                }
+
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(function() {
+                    console.log('Auto-save triggered');
+                    // Implement AJAX call here to save progress
+                    // Example: $.post('@Url.Action("SaveProgress")', $('#auditForm').serialize());
+                }, 5000);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,39 @@
+@model SmartComply.Models.FollowUpAudit
+@{
+    ViewData["Title"] = "Conduct Follow-Up Audit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Conduct Follow-Up Audit</h2>
+<form method="post" asp-action="Conduct" asp-route-id="@Model.Id">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label">Follow-Up Title</label>
+        <input class="form-control" value="@Model.FollowUpTitle" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" readonly>@Model.FollowUpDescription</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Scheduled Date</label>
+        <input class="form-control" value="@Model.ScheduledDate.ToString("yyyy-MM-dd")" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Conducted Date</label>
+        <input asp-for="ConductedDate" class="form-control" type="date" />
+        <span asp-validation-for="ConductedDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Findings</label>
+        <textarea asp-for="Findings" class="form-control"></textarea>
+        <span asp-validation-for="Findings" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Recommendations</label>
+        <textarea asp-for="Recommendations" class="form-control"></textarea>
+        <span asp-validation-for="Recommendations" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+</form>

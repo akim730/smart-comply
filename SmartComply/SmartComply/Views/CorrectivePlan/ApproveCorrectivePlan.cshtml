@@ -1,0 +1,238 @@
+@model SmartComply.ViewModels.CorrectivePlanApprovalViewModel
+@{
+    ViewData["Title"] = "Approve Corrective Plan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Approve Corrective Plan</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("ManagerDashboard", "Audit")">Manager Dashboard</a></li>
+                    <li class="breadcrumb-item active">Approve Corrective Plan</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Corrective Plan Details -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks me-1"></i>
+                        Corrective Plan Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Issue Identified:</th>
+                                    <td>@Model.CorrectivePlan.IssueIdentified</td>
+                                </tr>
+                                <tr>
+                                    <th>Priority:</th>
+                                    <td>
+                                        <span class="badge bg-@(Model.CorrectivePlan.Priority == "High" ? "danger" : Model.CorrectivePlan.Priority == "Medium" ? "warning" : "info")">
+                                            @Model.CorrectivePlan.Priority Priority
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge bg-primary">@Model.CorrectivePlan.Status</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Target Completion:</th>
+                                    <td>@Model.CorrectivePlan.TargetCompletionDate.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <th>Created Date:</th>
+                                    <td>@Model.CorrectivePlan.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                @if (Model.CorrectivePlan.ActualCompletionDate.HasValue)
+                                {
+                                    <tr>
+                                        <th>Completed Date:</th>
+                                        <td>@Model.CorrectivePlan.ActualCompletionDate.Value.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Corrective Action:</h6>
+                        <div class="bg-light p-3 rounded">
+                            @Model.CorrectivePlan.CorrectiveAction
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.CorrectivePlan.ProgressNotes))
+                    {
+                        <div class="mt-3">
+                            <h6>Progress Notes:</h6>
+                            <div class="bg-light p-3 rounded">
+                                @Model.CorrectivePlan.ProgressNotes
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Related Audit Information -->
+            @if (Model.CorrectivePlan.Audit != null)
+            {
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-clipboard-check me-1"></i>
+                            Related Audit Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Audit Title:</strong> @Model.CorrectivePlan.Audit.AuditTitle</p>
+                                <p><strong>Compliance:</strong> @Model.CorrectivePlan.Audit.Compliance?.ComplianceName</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Audit Score:</strong> 
+                                    @if (Model.CorrectivePlan.Audit.AuditScore.HasValue)
+                                    {
+                                        <span class="badge bg-info">@Model.CorrectivePlan.Audit.AuditScore.Value%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </p>
+                                <p><strong>Audit Status:</strong> 
+                                    <span class="badge bg-secondary">@Model.CorrectivePlan.Audit.AuditStatus</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="@Url.Action("Details", "Audit", new { id = Model.CorrectivePlan.Audit.Id })" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>
+                                View Full Audit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Approval Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-stamp me-1"></i>
+                        Approval Decision
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.CorrectivePlan.ApprovalStatus) && Model.CorrectivePlan.ApprovalStatus != "Pending")
+                    {
+                        <div class="alert alert-info">
+                            <h6>Previous Approval</h6>
+                            <p><strong>Status:</strong> @Model.CorrectivePlan.ApprovalStatus</p>
+                            @if (Model.CorrectivePlan.ApprovedAt.HasValue)
+                            {
+                                <p><strong>Approved At:</strong> @Model.CorrectivePlan.ApprovedAt.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.CorrectivePlan.ApprovalComments))
+                            {
+                                <p><strong>Comments:</strong> @Model.CorrectivePlan.ApprovalComments</p>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="SubmitApproval" asp-controller="CorrectivePlan" method="post">
+                        <input type="hidden" name="correctivePlanId" value="@Model.CorrectivePlan.Id" />
+                        
+                        <div class="mb-3">
+                            <label for="approvalStatus" class="form-label">Approval Decision</label>
+                            <select name="approvalStatus" id="approvalStatus" class="form-select" required>
+                                <option value="">Select Decision</option>
+                                <option value="Approved">Approve Plan</option>
+                                <option value="Rejected">Reject Plan</option>
+                                <option value="RequiresRevision">Requires Revision</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="approvalComments" class="form-label">Comments</label>
+                            <textarea name="approvalComments" id="approvalComments" class="form-control" rows="4" 
+                                      placeholder="Enter your approval comments..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-1"></i>
+                                Submit Approval
+                            </button>
+                            <a href="@Url.Action("ManagerDashboard", "Audit")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Approval Guidelines -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Approval Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            <strong>Approve:</strong> Plan is comprehensive and realistic
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-times-circle text-danger me-1"></i>
+                            <strong>Reject:</strong> Plan has significant flaws
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-edit text-warning me-1"></i>
+                            <strong>Requires Revision:</strong> Minor improvements needed
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Confirmation for approval submission
+            $('form').on('submit', function(e) {
+                var status = $('#approvalStatus').val();
+                if (status && !confirm('Are you sure you want to ' + status.toLowerCase() + ' this corrective plan?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

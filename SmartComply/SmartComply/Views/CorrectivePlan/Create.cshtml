@@ -1,0 +1,115 @@
+@model SmartComply.ViewModels.CorrectivePlanViewModel
+
+@{
+    ViewData["Title"] = "Create Corrective Action Plan";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>Create Corrective Action Plan
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="IssueIdentified" class="form-label"></label>
+                                    <textarea asp-for="IssueIdentified" class="form-control" rows="3" placeholder="Describe the issue that needs correction..."></textarea>
+                                    <span asp-validation-for="IssueIdentified" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="CorrectiveAction" class="form-label"></label>
+                                    <textarea asp-for="CorrectiveAction" class="form-control" rows="4" placeholder="Describe the corrective action to be taken..."></textarea>
+                                    <span asp-validation-for="CorrectiveAction" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ResponsiblePersonId" class="form-label"></label>
+                                    <select asp-for="ResponsiblePersonId" class="form-select">
+                                        <option value="">Select Responsible Person</option>
+                                        @foreach (var user in Model.Users)
+                                        {
+                                            <option value="@user.Id">@user.UserName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ResponsiblePersonId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="TargetCompletionDate" class="form-label"></label>
+                                    <input asp-for="TargetCompletionDate" type="date" class="form-control" />
+                                    <span asp-validation-for="TargetCompletionDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Priority" class="form-label"></label>
+                                    <select asp-for="Priority" class="form-select">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium" selected>Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                    <span asp-validation-for="Priority" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ProgressNotes" class="form-label"></label>
+                                    <textarea asp-for="ProgressNotes" class="form-control" rows="4" placeholder="Enter initial notes or progress updates..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="AuditId" class="form-label">Audit</label>
+                                    <select asp-for="AuditId" class="form-select">
+                                        <option value="">Select Audit</option>
+                                        @foreach (var audit in ViewBag.Audits as List<SmartComply.Models.Audit>)
+                                        {
+                                            <option value="@audit.Id">@audit.AuditTitle</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="AuditId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" asp-for="AuditId" />
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Index" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Action Plans
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save me-2"></i>Create Action Plan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Set default target completion date to 30 days from now
+            if (!$('#TargetCompletionDate').val()) {
+                var date = new Date();
+                date.setDate(date.getDate() + 30);
+                $('#TargetCompletionDate').val(date.toISOString().split('T')[0]);
+            }
+        });
+    </script>
+}

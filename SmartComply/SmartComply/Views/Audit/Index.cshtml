@@ -1,0 +1,253 @@
+@model SmartComply.ViewModels.AuditDashboardViewModel
+
+@{
+    ViewData["Title"] = "Audit Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">Audit Dashboard</h1>
+                <div>
+                    <a href="@Url.Action("Create")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Audit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Audits</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalAudits</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Completed</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CompletedAudits</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                In Progress</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.InProgressAudits</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Pending Corrections</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.RequiresCorrection</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Audits Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Audits</h6>
+                    <div>
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Index", new { filter = "all" })" class="btn btn-sm btn-outline-primary @(ViewBag.Filter == "all" ? "active" : "")">All</a>
+                            <a href="@Url.Action("Index", new { filter = "pending" })" class="btn btn-sm btn-outline-warning @(ViewBag.Filter == "pending" ? "active" : "")">Pending</a>
+                            <a href="@Url.Action("Index", new { filter = "inprogress" })" class="btn btn-sm btn-outline-info @(ViewBag.Filter == "inprogress" ? "active" : "")">In Progress</a>
+                            <a href="@Url.Action("Index", new { filter = "completed" })" class="btn btn-sm btn-outline-success @(ViewBag.Filter == "completed" ? "active" : "")">Completed</a>
+                        </div>
+                    </div>
+                </div>                <div class="card-body">
+                    @if (Model.Audits.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Audit Title</th>
+                                        <th>Compliance</th>
+                                        <th>Status</th>
+                                        <th>Audit Date</th>
+                                        <th>Auditor</th>
+                                        <th>Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var audit in Model.Audits)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@audit.AuditTitle</strong>
+                                                @if (!string.IsNullOrEmpty(audit.AuditDescription))
+                                                {
+                                                    <br>
+                                        
+                                                    <small class="text-muted">@audit.AuditDescription.Substring(0, Math.Min(50, audit.AuditDescription.Length))...</small>
+                                                }
+                                            </td>
+                                            <td>@audit.Compliance?.ComplianceName</td>
+                                            <td>
+                                                @{
+                                                    string statusClass = "badge-secondary"; // Default
+                                                    string displayText = audit.AuditStatus;
+
+                                                    switch (audit.AuditStatus)
+                                                    {
+                                                        case "Pending":
+                                                            statusClass = "badge-warning";
+                                                            displayText = "Pending";
+                                                            break;
+                                                        case "InProgress":
+                                                            statusClass = "badge-info";
+                                                            displayText = "In Progress";
+                                                            break;
+                                                        case "Completed":
+                                                            statusClass = "badge-success";
+                                                            displayText = "Completed";
+                                                            break;
+                                                        case "RequiresCorrection":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Requires Correction";
+                                                            break;
+                                                        case "Approved":
+                                                            statusClass = "badge-success";
+                                                            displayText = "Approved";
+                                                            break;
+                                                        case "Rejected":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Rejected";
+                                                            break;
+                                                        case "RequiresRevision":
+                                                            statusClass = "badge-danger";
+                                                            displayText = "Requires Revision";
+                                                            break;
+                                                        default:
+                                                            statusClass = "badge-secondary";
+                                                            displayText = string.IsNullOrEmpty(audit.AuditStatus) ? "Unknown" : audit.AuditStatus;
+                                                            break;
+                                                    }
+                                                }
+                                                <span class="badge @statusClass">@displayText</span>
+                                            </td>
+                                            <td>@audit.AuditDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@audit.AuditorId</td>
+                                            <td>
+                                                @if (audit.AuditScore.HasValue)
+                                                {
+                                                    <span class="badge @(audit.AuditScore >= 80 ? "badge-success" : audit.AuditScore >= 60 ? "badge-warning" : "badge-danger")">
+                                                        @audit.AuditScore.Value.ToString("F1")%
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = audit.Id })" class="btn btn-sm btn-outline-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @{
+                                                        // Determine if the audit is in a final state where actions should be disabled
+                                                        bool isFinalStatus = audit.AuditStatus == "Completed" || audit.AuditStatus == "Approved";
+                                                        string disabledClass = isFinalStatus ? "disabled" : "";
+                                                        string tabIndex = isFinalStatus ? "-1" : ""; // Prevent tabbing to disabled links
+                                                        string ariaDisabled = isFinalStatus ? "true" : "false"; // For accessibility
+                                                    }
+
+                                                    <a href="@Url.Action("Conduct", new { id = audit.Id })"
+                                                       class="btn btn-sm btn-outline-primary @disabledClass"
+                                                       title="Conduct Audit"
+                                                       tabindex="@tabIndex"
+                                                       aria-disabled="@ariaDisabled">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", new { id = audit.Id })"
+                                                       class="btn btn-sm btn-outline-secondary @disabledClass"
+                                                       title="Edit"
+                                                       tabindex="@tabIndex"
+                                                       aria-disabled="@ariaDisabled">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">No audits found. <a href="@Url.Action("Create")">Create your first audit</a></p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh dashboard every 30 seconds
+        setInterval(function() {
+            // Only refresh if user is still on the page and no modals are open
+            if (document.visibilityState === 'visible' && $('.modal.show').length === 0) {
+                location.reload();
+            }
+        }, 30000);
+    </script>
+}

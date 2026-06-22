@@ -1,0 +1,109 @@
+@model IEnumerable<SmartComply.Models.FollowUpAudit>
+
+@{
+    ViewData["Title"] = "Follow-up Audits";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-redo me-2"></i>Follow-up Audits
+                        </h4>
+                        <a asp-action="Create" class="btn btn-light">
+                            <i class="fas fa-plus me-2"></i>Schedule Follow-up
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-redo fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No follow-up audits scheduled</h5>
+                            <p class="text-muted">Schedule follow-up audits to track improvement progress.</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Schedule Follow-up
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Follow-up Title</th>
+                                        <th>Original Audit</th>
+                                        <th>Scheduled Date</th>
+                                        <th>Conducted Date</th>
+                                        <th>Status</th>
+                                        <th>Auditor</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        var statusBadgeClass = item.Status switch
+                                        {
+                                            "Scheduled" => "bg-warning",
+                                            "Completed" => "bg-success",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+
+                                        var isOverdue = item.ScheduledDate < DateTime.Now && item.Status == "Scheduled";
+                                        
+                                        <tr class="@(isOverdue ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@item.FollowUpTitle</strong>
+                                                @if (isOverdue)
+                                                {
+                                                    <i class="fas fa-clock text-warning ms-2" title="Overdue"></i>
+                                                }
+                                            </td>
+                                            <td>@(item.OriginalAudit?.AuditTitle ?? "N/A")</td>
+                                            <td>@item.ScheduledDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (item.ConductedDate.HasValue)
+                                                {
+                                                    @item.ConductedDate.Value.ToString("MMM dd, yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not conducted</span>
+                                                }
+                                            </td>
+                                            <td><span class="badge @statusBadgeClass">@item.Status</span></td>
+                                            <td>@item.AuditorId</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if (item.Status == "Scheduled")
+                                                    {
+                                                        <a asp-action="Conduct" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">
+                                                            <i class="fas fa-play"></i>
+                                                        </a>
+                                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,98 @@
+@model SmartComply.ViewModels.CreateAuditViewModel
+
+@{
+    ViewData["Title"] = "Edit Audit";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Audit
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AuditTitle" class="form-label"></label>
+                                    <input asp-for="AuditTitle" class="form-control" />
+                                    <span asp-validation-for="AuditTitle" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ComplianceId" class="form-label"></label>
+                                    <select asp-for="ComplianceId" class="form-select">
+                                        <option value="">Select Compliance</option>
+                                        @foreach (var compliance in Model.Compliances)
+                                        {
+                                            <option value="@compliance.Id">@compliance.ComplianceName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ComplianceId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="FormId" class="form-label"></label>
+                                    <select asp-for="FormId" class="form-select">
+                                        <option value="">Select Audit Form</option>
+                                        @foreach (var form in Model.Forms)
+                                        {
+                                            <option value="@form.Id">@form.FoName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="FormId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="AuditDate" class="form-label"></label>
+                                    <input asp-for="AuditDate" type="date" class="form-control" />
+                                    <span asp-validation-for="AuditDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AuditDescription" class="form-label"></label>
+                                    <textarea asp-for="AuditDescription" class="form-control" rows="6"></textarea>
+                                    <span asp-validation-for="AuditDescription" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="AuditeeId" class="form-label"></label>
+                                    <select asp-for="AuditeeId" class="form-select">
+                                        <option value="">Select Auditee (Optional)</option>
+                                        @foreach (var user in Model.Users)
+                                        {
+                                            <option value="@user.Id">@user.UserName</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Index" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Audits
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Update Audit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

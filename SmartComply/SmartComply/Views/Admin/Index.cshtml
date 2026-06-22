@@ -1,0 +1,350 @@
+﻿@model SmartComply.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+   
+}
+
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="index.html"><img src="~/assets/images/logo/logo.png" alt="Logo" srcset=""></a>
+                </div>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Menu</li>
+
+                <li class="sidebar-item active ">
+                    <a asp-controller="Admin" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="ComplianceFrameworks" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Framework</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="FoForm" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Dynamic Form</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item  ">
+                    <a asp-controller="AdminFiling" asp-action="Index" class='sidebar-link'>
+                        <i class="bi bi-file-earmark-medical-fill"></i>
+                        <span>Compliance Folder</span>
+                    </a>
+                </li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="sidebar-item ">
+                        
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+                            
+                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>Logout</span>
+                            </button>
+                            @Html.AntiForgeryToken() @* Essential for security! *@
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="sidebar-item ">
+                        <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                            <i class="bi bi-file-earmark-medical-fill"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                }
+
+
+            </ul>
+        </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>
+<div class="page-heading">
+    <h3>Dashboard</h3> @* This heading can be changed to "Compliance Overview" or "Dashboard Statistics" *@
+</div>
+<div class="page-content">
+    <section class="row">
+        <div>
+            <div class="row">
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon purple">
+                                        <i class="iconly-boldShow"></i> @* You might want to change this icon *@
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">Compliance Types</h6>
+                                    <h6 class="font-extrabold mb-0">@Model.TotalComplianceTypes</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon blue">
+                                        <i class="iconly-boldProfile"></i> @* You might want to change this icon *@
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">Total Forms</h6>
+                                    <h6 class="font-extrabold mb-0">@Model.TotalForms</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon green">
+                                        <i class="iconly-boldAdd-User"></i> @* You might want to change this icon *@
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">Archived Forms</h6>
+                                    <h6 class="font-extrabold mb-0">@Model.TotalArchivedForms</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon red">
+                                        <i class="iconly-boldBookmark"></i> @* You might want to change this icon *@
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    
+                                    <h6 class="text-muted font-semibold">Total Folders Created</h6>
+                                    <h6 class="font-extrabold mb-0">@Model.TotalFoldersCreated</h6>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Latest Forms Created</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-lg">
+                                    <thead>
+                                        <tr>
+                                            <th>Form Name</th>
+                                            <th>Compliance Type</th>
+                                            <th>Created Date</th>
+                                            <th>Archived</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.LatestForms.Any())
+                                        {
+                                            @foreach (var form in Model.LatestForms)
+                                            {
+                                                <tr>
+                                                    <td class="col-4">
+                                                        <p class="font-bold mb-0">@form.FoName</p>
+                                                    </td>
+                                                    <td class="col-3">
+                                                        <p class="mb-0">@form.AmCompliance?.ComplianceName</p>
+                                                    </td>
+                                                    <td class="col-3">
+                                                        <p class="mb-0">@form.FoDatetime.ToShortDateString()</p>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <span class="badge @(form.isArchived ? "bg-danger" : "bg-success")">
+                                                            @(form.isArchived ? "Yes" : "No")
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="4">No forms created yet.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>All Defined Compliance Types</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-lg">
+                                    <thead>
+                                        <tr>
+                                            <th>Compliance Name</th>
+                                            <th>Description</th>
+                                            <th>Forms Count</th>
+                                            <th>Created At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.ComplianceOverview.Any())
+                                        {
+                                            @foreach (var complianceItem in Model.ComplianceOverview)
+                                            {
+                                                <tr>
+                                                    <td>@complianceItem.ComplianceName</td>
+                                                    <td>@complianceItem.ComplianceDescription</td>
+                                                    <td>@complianceItem.FormsCount</td>
+                                                    <td>@complianceItem.CreatedAt.ToShortDateString()</td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="4">No compliance types have been defined yet.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>All Created Folders</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-lg">
+                                    <thead>
+                                        <tr>
+                                            <th>Folder Name</th>
+                                            <th>Compliance Type</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.AllComplianceFolders.Any())
+                                        {
+                                            @foreach (var folder in Model.AllComplianceFolders)
+                                            {
+                                                <tr>
+                                                    <td>@folder.Name</td>
+                                                    <td>@folder.AmCompliance?.ComplianceName</td> @* Access ComplianceType Name *!/*@
+                                                    <td>@folder.CreatedAt.ToShortDateString()</td>
+                                                    <td>
+                                                        <a asp-action="FolderDetails" asp-controller="AdminFiling" asp-route-id="@folder.Id" class="btn btn-sm btn-info">View Items</a>
+                                                        @* Add other actions like Edit/Delete if needed *@
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="4">No folders have been created yet.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            @* You can keep or remove these sections based on your actual dashboard needs.
+                They currently use static data and chart IDs that would require JavaScript
+                libraries (like ApexCharts) to function. *@
+            </div>
+
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/assets/vendors/apexcharts/apexcharts.js"></script>
+    @* Example of how charts might be initialized (requires data from ViewModel) *@
+}
+
+<style>
+    /* Optional: Style the form and button to look exactly like your existing sidebar links */
+    .sidebar-form {
+        display: block; /* Make the form take full width of li */
+        margin: 0;
+        padding: 0;
+    }
+
+        .sidebar-form .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem; /* Match your existing sidebar-link padding */
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--bs-body-color); /* Inherit text color from your theme */
+        }
+
+            .sidebar-form .sidebar-link:hover {
+                background-color: var(--bs-gray-200); /* Example hover background */
+            }
+
+            .sidebar-form .sidebar-link i {
+                margin-right: 1rem; /* Space between icon and text */
+            }
+
+            .sidebar-form .sidebar-link span {
+                flex-grow: 1; /* Allow text to fill remaining space */
+            }
+</style>

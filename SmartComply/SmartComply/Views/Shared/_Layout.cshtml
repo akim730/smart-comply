@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - SmartComply</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/assets/css/bootstrap.css">
+    <link rel="stylesheet" href="~/assets/vendors/iconly/bold.css">
+    <link rel="stylesheet" href="~/assets/vendors/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="~/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/assets/css/app.css">
+    <link rel="shortcut icon" href="~/assets/images/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-header">
+                    <div class="d-flex justify-content-between">
+                        <div class="logo">
+                            <a href="~/"><img src="~/assets/images/logo/logo.png" alt="SmartComply" style="height: 50px;"></a>
+                        </div>
+                        <div class="toggler">
+                            <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">Main Menu</li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            // === Common Links for all authenticated users (e.g., Dashboard) ===
+                            
+
+                            // === Auditor Sidebar Items ===
+                            @if (User.IsInRole("Auditor")) // Replace "Auditor" with your actual Auditor role name
+                            {
+                                <li class="sidebar-item has-sub">
+                                    <a href="#" class="sidebar-link">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        <span>Audit Management</span>
+                                    </a>
+                                    <ul class="submenu">
+                                        <li class="submenu-item">
+                                            <a href="~/Audit">Audit Dashboard</a>
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/Audit/Create">Create New Audit</a>
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/CorrectivePlan">My Action Plans</a> @* Maybe specific to their assigned plans *@
+                                        </li>
+                                        @* Auditors might not create follow-ups, but can view them if assigned *@
+                                        <li class="submenu-item">
+                                            <a href="~/FollowUpAudit">My Follow-up Audits</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                // Add other Auditor-specific menu items here
+                            }
+
+                            // === Manager Sidebar Items ===
+                            @if (User.IsInRole("Manager")) // Replace "Manager" with your actual Manager role name
+                            {
+                                <li class="sidebar-item has-sub">
+                                    <a href="#" class="sidebar-link">
+                                        <i class="fas fa-user-tie"></i> @* Changed icon to suggest management *@
+                                        <span>Manager Functions</span>
+                                    </a>
+                                    <ul class="submenu">
+                                        <li class="submenu-item">
+                                            <a href="~/Audit/ManagerDashboard">Audit Overview (Manager)</a> @* Create this view if it doesn't exist *@
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/CorrectivePlan/">Review Action Plans</a> @* A manager-specific review page *@
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/FollowUpAudit/">Review Follow-up Audits</a> @* A manager-specific review page *@
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/Filing">Upload Documents</a> @* Assuming managers can manage users *@
+                                        </li>
+                                        
+                                    </ul>
+                                </li>
+                                // Add other Manager-specific menu items here
+                            }
+
+                            // === Admin Sidebar Items (if you have an Admin role) ===
+                            @if (User.IsInRole("Admin")) // Example for an Admin role
+                            {
+                                <li class="sidebar-item has-sub">
+                                    <a href="#" class="sidebar-link">
+                                        <i class="fas fa-cogs"></i>
+                                        <span>Admin Settings</span>
+                                    </a>
+                                    <ul class="submenu">
+                                        <li class="submenu-item">
+                                            <a href="~/Admin/Roles">Manage Roles</a>
+                                        </li>
+                                        <li class="submenu-item">
+                                            <a href="~/Admin/Logs">View Logs</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+
+                            // === Logout Link (visible to all authenticated users) ===
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="sidebar-item ">
+
+                                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post" id="logoutForm" class="sidebar-form">
+
+                                        <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; padding: 0; margin: 0; color: inherit;">
+                                            <i class="bi bi-file-earmark-medical-fill"></i>
+                                            <span>Logout</span>
+                                        </button>
+                                        @Html.AntiForgeryToken() @* Essential for security! *@
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="sidebar-item ">
+                                    <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                                        <i class="bi bi-file-earmark-medical-fill"></i>
+                                        <span>Login</span>
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            // === Login Link (visible only to unauthenticated users) ===
+                            <li class="sidebar-item ">
+                                <a asp-area="Identity" asp-page="/Account/Login" class='sidebar-link'>
+                                    <i class="bi bi-box-arrow-in-right"></i> @* Changed icon for login *@
+                                    <span>Login</span>
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer clearfix mb-0 text-muted">
+            <div class="float-start">
+                <p>2025 &copy; SmartComply</p>
+            </div>
+            <div class="float-end">
+                <p>
+                    Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a href="#">SmartComply Team</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="~/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/vendors/apexcharts/apexcharts.js"></script>
+    <script src="~/assets/js/pages/dashboard.js"></script>
+    <script src="~/assets/js/main.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

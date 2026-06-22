@@ -1,0 +1,209 @@
+@model SmartComply.ViewModels.CreateAuditViewModel
+
+@{
+    ViewData["Title"] = Model.IsEdit ? "Edit Audit" : "Create New Audit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Audit Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="@(Model.IsEdit ? "Edit" : "Create")" method="post">
+                        @if (Model.IsEdit)
+                        {
+                            <input asp-for="Id" type="hidden" />
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="AuditTitle" class="form-label">Audit Title <span class="text-danger">*</span></label>
+                            <input asp-for="AuditTitle" class="form-control" placeholder="Enter audit title" />
+                            <span asp-validation-for="AuditTitle" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="AuditDescription" class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea asp-for="AuditDescription" class="form-control" rows="4" placeholder="Describe the purpose and scope of this audit"></textarea>
+                            <span asp-validation-for="AuditDescription" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ComplianceId" class="form-label">Compliance Standard <span class="text-danger">*</span></label>
+                                    <select asp-for="ComplianceId" class="form-control" id="ComplianceId">
+                                        <option value="">Select Compliance Standard</option>
+                                        @foreach (var compliance in Model.Compliances)
+                                        {
+                                            <option value="@compliance.Id">@compliance.ComplianceName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ComplianceId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FormId" class="form-label">Audit Form <span class="text-danger">*</span></label>
+                                    <select asp-for="FormId" class="form-control" id="FormId">
+                                        <option value="">Select Audit Form</option>
+                                        @* Forms will be dynamically loaded here *@
+                                    </select>
+                                    <span asp-validation-for="FormId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AuditDate" class="form-label">Audit Date <span class="text-danger">*</span></label>
+                                    <input asp-for="AuditDate" type="date" class="form-control" />
+                                    <span asp-validation-for="AuditDate" class="text-danger"></span>
+                                </div>
+                            </div>                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AuditeeId" class="form-label">Auditee (Optional)</label>
+                                    <select asp-for="AuditeeId" class="form-control">
+                                        <option value="">Select Auditee</option>
+                                        @foreach (var user in Model.Users)
+                                        {
+                                            <option value="@user.Id">@user.UserName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="AuditeeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!Model.IsEdit)
+                        {
+                            <div class="form-group">
+                                <label asp-for="AuditStatus" class="form-label">Initial Status</label>
+                                <select asp-for="AuditStatus" class="form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="InProgress">In Progress</option>
+                                </select>
+                                <span asp-validation-for="AuditStatus" class="text-danger"></span>
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="AuditNotes" class="form-label">Notes</label>
+                            <textarea asp-for="AuditNotes" class="form-control" rows="3" placeholder="Additional notes or instructions"></textarea>
+                            <span asp-validation-for="AuditNotes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> @(Model.IsEdit ? "Update Audit" : "Create Audit")
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Guide -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Guide</h6>
+                </div>
+                <div class="card-body">
+                    <h6>Creating an Audit:</h6>
+                    <ul class="small">
+                        <li>Choose a descriptive title that identifies the audit purpose</li>
+                        <li>Select the appropriate compliance standard (ISO, SOX, GDPR, etc.)</li>
+                        <li>Pick the correct audit form template</li>
+                        <li>Set the audit date (can be today or future date)</li>
+                        <li>Optionally assign an auditee</li>
+                    </ul>
+
+                    <h6 class="mt-3">Status Meanings:</h6>
+                    <ul class="small">
+                        <li><strong>Pending:</strong> Audit is scheduled but not started</li>
+                        <li><strong>In Progress:</strong> Audit is currently being conducted</li>
+                        <li><strong>Completed:</strong> Audit has been finished</li>
+                        <li><strong>Requires Correction:</strong> Issues found, corrective actions needed</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Form Preview -->
+            
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            // Function to load forms based on selected compliance
+            function loadForms(complianceId) {
+                var formDropdown = $('#FormId');
+                formDropdown.empty(); // Clear existing options
+                formDropdown.append($('<option></option>').val('').text('Select Audit Form')); // Add default option
+
+                if (complianceId) {
+                    $.ajax({
+                        url: '@Url.Action("GetFormsByCompliance", "Audit")', // Ensure this matches your controller and action
+                        type: 'GET',
+                        data: { complianceId: complianceId },
+                        success: function (data) {
+                            $.each(data, function (i, form) {
+                                formDropdown.append($('<option></option>').val(form.value).text(form.text));
+                            });
+                            // If in edit mode and a FormId is already set, select it after loading
+                            @if (Model.IsEdit && Model.FormId != 0)
+                            {
+                                    <text>
+                                        formDropdown.val(@Model.FormId);
+                                    </text>
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error loading forms:", error);
+                            // Optionally, show an error message to the user
+                        }
+                    });
+                }
+            }
+
+            // Event listener for Compliance Standard dropdown change
+            $('#ComplianceId').change(function () {
+                var selectedComplianceId = $(this).val();
+                loadForms(selectedComplianceId);
+            });
+
+            // Initial load for edit mode or if a compliance is already selected on page load
+            @if (Model.IsEdit && Model.ComplianceId != 0)
+            {
+                    <text>
+                        // Trigger change event programmatically to load forms when in edit mode
+                        loadForms($('#ComplianceId').val());
+                    </text>
+            }
+        });
+    </script>
+    
+}

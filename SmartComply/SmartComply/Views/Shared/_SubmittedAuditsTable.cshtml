@@ -1,0 +1,116 @@
+@model List<SmartComply.Models.Audit>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover data-table">
+            <thead>
+                <tr>
+                    <th>Audit Title</th>
+                    <th>Compliance</th>
+                    <th>Score</th>
+                    <th>Completed Date</th>
+                    <th>Verification Status</th>
+                    <th>Verified By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var audit in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@audit.AuditTitle</strong>
+                            <br><small class="text-muted">@audit.AuditDescription</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">@audit.Compliance?.ComplianceName</span>
+                        </td>
+                        <td>
+                            @if (audit.AuditScore.HasValue)
+                            {
+                                <span class="badge bg-@(audit.AuditScore.Value >= 80 ? "success" : audit.AuditScore.Value >= 60 ? "warning" : "danger") fs-6">
+                                    @audit.AuditScore.Value%
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (audit.CompletedDate.HasValue)
+                            {
+                                @audit.CompletedDate.Value.ToString("MMM dd, yyyy")
+                                <br><small class="text-muted">@audit.CompletedDate.Value.ToString("HH:mm")</small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not completed</span>
+                            }
+                        </td>
+                        <td>
+                            @if (string.IsNullOrEmpty(audit.VerificationStatus) || audit.VerificationStatus == "Pending")
+                            {
+                                <span class="badge bg-warning">Pending Verification</span>
+                            }
+                            else if (audit.VerificationStatus == "Approved")
+                            {
+                                <span class="badge bg-success">Approved</span>
+                            }
+                            else if (audit.VerificationStatus == "Rejected")
+                            {
+                                <span class="badge bg-danger">Rejected</span>
+                            }
+                            else if (audit.VerificationStatus == "RequiresRevision")
+                            {
+                                <span class="badge bg-info">Requires Revision</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@audit.VerificationStatus</span>
+                            }
+                        </td>
+                        <td>
+                            @if (audit.VerifiedAt.HasValue)
+                            {
+                                @audit.VerifiedAt.Value.ToString("MMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("Details", new { id = audit.Id })" class="btn btn-outline-primary btn-sm" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if (string.IsNullOrEmpty(audit.VerificationStatus) || audit.VerificationStatus == "Pending")
+                                {
+                                    <a href="@Url.Action("VerifyAudit", new { id = audit.Id })" class="btn btn-outline-warning btn-sm" title="Verify Audit">
+                                        <i class="fas fa-stamp"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("VerifyAudit", new { id = audit.Id })" class="btn btn-outline-info btn-sm" title="View Verification">
+                                        <i class="fas fa-check-circle"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-4">
+        <i class="fas fa-search fa-2x text-muted mb-3"></i>
+        <h5>No audits found</h5>
+        <p class="text-muted">No audits match the current filter criteria.</p>
+    </div>
+}

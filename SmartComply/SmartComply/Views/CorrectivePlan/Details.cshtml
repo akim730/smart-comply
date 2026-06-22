@@ -1,0 +1,28 @@
+@model SmartComply.Models.CorrectivePlan
+@{
+    ViewData["Title"] = "Corrective Plan Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Corrective Plan Details</h2>
+
+<table class="table table-bordered">
+    <tr><th>ID</th><td>@Model.Id</td></tr>
+    <tr><th>Audit ID</th><td>@Model.AuditId</td></tr>
+    <tr><th>Issue Identified</th><td>@Model.IssueIdentified</td></tr>
+    <tr><th>Corrective Action</th><td>@Model.CorrectiveAction</td></tr>
+    <tr><th>Responsible Person</th><td>@Model.ResponsiblePersonId</td></tr>
+    <tr><th>Target Completion Date</th><td>@Model.TargetCompletionDate.ToString("yyyy-MM-dd")</td></tr>
+    <tr><th>Actual Completion Date</th><td>@(Model.ActualCompletionDate != null ? Model.ActualCompletionDate.Value.ToString("yyyy-MM-dd") : "")</td></tr>
+    <tr><th>Status</th><td>@Model.Status</td></tr>
+    <tr><th>Priority</th><td>@Model.Priority</td></tr>
+    <tr><th>Progress Notes</th><td>@Model.ProgressNotes</td></tr>
+    <tr><th>Approval Status</th><td>@Model.ApprovalStatus</td></tr>
+    <tr><th>Approved By</th><td>@Model.ApprovedById</td></tr>
+    <tr><th>Approved At</th><td>@(Model.ApprovedAt != null ? Model.ApprovedAt.Value.ToString("yyyy-MM-dd HH:mm") : "")</td></tr>
+    <tr><th>Approval Comments</th><td>@Model.ApprovalComments</td></tr>
+    <tr><th>Created At</th><td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td></tr>
+    <tr><th>Updated At</th><td>@(Model.UpdatedAt != null ? Model.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "")</td></tr>
+</table>
+
+<a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>

@@ -1,0 +1,110 @@
+@model SmartComply.ViewModels.FollowUpAuditViewModel
+
+@{
+    ViewData["Title"] = "Schedule Follow-up Audit";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-redo me-2"></i>Schedule Follow-up Audit
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.OriginalAudit != null)
+                    {
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Original Audit Information</h6>
+                            <p class="mb-1"><strong>Title:</strong> @Model.OriginalAudit.AuditTitle</p>
+                            <p class="mb-1"><strong>Date:</strong> @Model.OriginalAudit.AuditDate.ToString("MMM dd, yyyy")</p>
+                            <p class="mb-0"><strong>Status:</strong> @Model.OriginalAudit.AuditStatus</p>
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
+                        <input type="hidden" asp-for="OriginalAuditId" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FollowUpTitle" class="form-label"></label>
+                                    <input asp-for="FollowUpTitle" class="form-control" placeholder="Enter follow-up audit title..." />
+                                    <span asp-validation-for="FollowUpTitle" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ScheduledDate" class="form-label"></label>
+                                    <input asp-for="ScheduledDate" type="datetime-local" class="form-control" />
+                                    <span asp-validation-for="ScheduledDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="AuditorId" class="form-label"></label>
+                                    <select asp-for="AuditorId" class="form-select">
+                                        <option value="">Select Auditor</option>
+                                        @foreach (var user in Model.Users)
+                                        {
+                                            <option value="@user.Id">@user.UserName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="AuditorId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FollowUpDescription" class="form-label"></label>
+                                    <textarea asp-for="FollowUpDescription" class="form-control" rows="8" placeholder="Describe the purpose and scope of this follow-up audit..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Index" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Follow-ups
+                                    </a>
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="fas fa-calendar-plus me-2"></i>Schedule Follow-up
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Set default scheduled date to 30 days from original audit date
+            if (!$('#ScheduledDate').val()) {
+                var date = new Date();
+                date.setDate(date.getDate() + 30);
+                // Format for datetime-local input
+                var isoString = date.toISOString();
+                var localDateTime = isoString.slice(0, 16);
+                $('#ScheduledDate').val(localDateTime);
+            }
+            
+            // Auto-generate title based on original audit
+            @if (Model.OriginalAudit != null)
+            {
+                <text>
+                if (!$('#FollowUpTitle').val()) {
+                    $('#FollowUpTitle').val('Follow-up: @Model.OriginalAudit.AuditTitle');
+                }
+                </text>
+            }
+        });
+    </script>
+}
