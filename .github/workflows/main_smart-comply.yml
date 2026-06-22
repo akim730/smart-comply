@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Build with dotnet
-        run: dotnet build ./SmartComply/SmartComply.sln --configuration Release
+        run: dotnet build ./SmartComply/SmartComply/SmartComply.sln --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./SmartComply/SmartComply.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./SmartComply/SmartComply/SmartComply.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
