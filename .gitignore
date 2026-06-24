@@ -6,7 +6,7 @@
 # dotenv files
 .env
 
-# Project data folder recommit
+# Project data folder
 data/
 
 # User-specific files
