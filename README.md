@@ -135,7 +135,7 @@ SmartComply is hosted on **Microsoft Azure** using the following services:
 ### Azure App Service
 - **Plan:** Free F1 Tier
 - **Runtime:** .NET 9 on Windows
-- **URL:** `https://smart-comply.azurewebsites.net`
+- **URL:** [SmartComply](https://smart-comply-hjetbab7fccffqbz.eastasia-01.azurewebsites.net/Identity/Account/Login?ReturnUrl=%2F)
 
 ### CI/CD with GitHub Actions
 Every push to the `main` branch automatically triggers a deployment pipeline:
