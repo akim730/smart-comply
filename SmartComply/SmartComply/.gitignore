@@ -47,6 +47,9 @@ appsettings.Development.json
 appsettings.local.json
 appsettings.*.local.json
 
+# Project data folder
+data/
+
 # SQL Server files
 *.mdf
 *.ldf
