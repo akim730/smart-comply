@@ -20,6 +20,8 @@
 
 ## About the Project
 
+<img src="9e31a571-3e6d-4c86-81c0-d129079c828f.jpg" alt="SmartComply Logo" width="200"/>
+
 **SmartComply** is an internal auditing system commissioned by **Holistic Lab** to digitise and centralise their audit and compliance processes. The system allows administrators and auditors to manage audit records, track compliance status, assign roles, and generate reports — all from a single web interface.
 
 This project replaces manual audit tracking with a structured, role-based web application that ensures accountability and transparency across the organisation.
